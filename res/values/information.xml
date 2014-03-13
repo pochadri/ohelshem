@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="layers">
+        <item>ט</item>
+        <item>י</item>
+        <item>יא</item>
+        <item>יב</item>
+    </string-array>
+	<integer-array name="layers_classes">
+	    <item>@integer/layer_nine_number_of_classes</item>
+	    <item>@integer/layer_ten_number_of_classes</item>
+	    <item>@integer/layer_eleven_number_of_classes</item>
+	    <item>@integer/layer_tweleve_number_of_classes</item>
+	</integer-array>
+    <integer name="layer_nine_number_of_classes">12</integer>
+    <integer name="layer_ten_number_of_classes">11</integer>
+    <integer name="layer_eleven_number_of_classes">11</integer>
+    <integer name="layer_tweleve_number_of_classes">11</integer>
+    <integer name="max_lessons">10</integer>
+
+</resources>

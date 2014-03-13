@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/scrollView1"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <it.gmariotti.cardslib.library.view.CardView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:card="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/card_question1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            card:card_layout_resourceID="@layout/card_layout_expend" />
+
+        <it.gmariotti.cardslib.library.view.CardView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:card="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/card_question2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            card:card_layout_resourceID="@layout/card_layout_expend" />
+
+        <it.gmariotti.cardslib.library.view.CardView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:card="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/card_question3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            card:card_layout_resourceID="@layout/card_layout_expend" />
+
+        <it.gmariotti.cardslib.library.view.CardView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:card="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/card_question4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            card:card_layout_resourceID="@layout/card_layout_expend" />
+
+        <it.gmariotti.cardslib.library.view.CardView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:card="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/card_question5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            card:card_layout_resourceID="@layout/card_layout_expend" />
+
+        <it.gmariotti.cardslib.library.view.CardView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:card="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/card_question6"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            card:card_layout_resourceID="@layout/card_layout_expend" />
+
+        <it.gmariotti.cardslib.library.view.CardView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:card="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/card_question7"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            card:card_layout_resourceID="@layout/card_layout_expend" />
+
+        <it.gmariotti.cardslib.library.view.CardView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:card="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/card_question8"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            card:card_layout_resourceID="@layout/card_layout_expend" />
+
+        <it.gmariotti.cardslib.library.view.CardView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:card="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/card_question9"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            card:card_layout_resourceID="@layout/card_layout_expend" />
+
+        <it.gmariotti.cardslib.library.view.CardView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:card="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/card_question10"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            card:card_layout_resourceID="@layout/card_layout_expend" />
+        
+        <it.gmariotti.cardslib.library.view.CardView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:card="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/card_question11"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            card:card_layout_resourceID="@layout/card_layout_expend" />
+    </LinearLayout>
+
+</ScrollView>

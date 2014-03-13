@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="questions">
+        <item>השינויים לא נכונים / רשמו שאין שינויים והיו שינויים, למה</item>
+        <item>מי בנה את האפליקציה</item>
+        <item>כיצה האפליקציה נבנתה</item>
+        <item>האם תהיה גם גרסה ל-iOS</item>
+        <item>איך האפליקציה עובדת</item>
+        <item>זה מעניין, אפשר לראות את הקוד</item>
+        <item>באיזה רשיון האפליקציה משוחררת</item>
+        <item>האפליקציה קורסת, מדוע</item>
+        <item>יש לי הצעות לשיפור, מה אני עושה איתם</item>
+        <item>למי מגיע קרדיט נוסף על האפליקציה</item>
+        <item>האם בנית עוד אפליקציות?</item>
+    </string-array>
+
+</resources>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">מערכת שינויים</string>
+    <string name="action_settings">הגדרות</string>
+    <string name="next_button">הבא</string>
+    <string name="back_button">חזור</string>
+    <string name="cancel_button">בטל</string>
+    <string name="finish_button">סיים</string>
+    <string name="choose_layer">בחר שכבה</string>
+    <string name="choose_class">בחר כיתה</string>
+    <string name="want_get_update">האם ברצונך לקבל עדכון כשמערכת השינויים מתעדכנת ב-21:00?</string>
+    <string name="yes">כן</string>
+    <string name="no">לא</string>
+    <string name="no_changes">אין שינויים</string>
+    <string name="no_connection">לא קייים חיבור לאינטרנט</string>
+    <string name="error_button">נסה שנית</string>
+    <string name="action_refresh">עדכן שינויים</string>
+    <string name="error">התרחשה שגיאה, אנא נסה שנית</string>
+    <string name="loading_message">מחשב את השורש של מינוס אחד</string>
+    <string name="notification_title">השינויים התעדכנו</string>
+    <string name="notification_text">כנס לאפליקציה על מנת לקרוא אותם</string>
+    <string name="saved">המידע נשמר</string>
+    <string name="last_updated">המערכת מעודכנת לתאריך</string>
+    <string name="last_updated_subtitle">עודכן לאחרונה בתאריך</string>
+    <string name="never_updated">עדיין לא עודכן</string>
+    <string name="lesson_number">שיעור מספר</string>
+
+    <string-array name="navigation_titles">
+        <item>השינויים שלי</item>
+        <item>שכבת ט</item>
+        <item>שכבת י</item>
+        <item>שכבת יא</item>
+        <item>שכבת יב</item>
+        <item>עזרה</item>
+    </string-array>
+
+    <array name="navigation_icons">
+        <item>@drawable/nav_one</item>
+        <item>@drawable/nav_two</item>
+        <item>@drawable/nav_three</item>
+        <item>@drawable/nav_four</item>
+        <item>@drawable/nav_five</item>
+        <item>@drawable/nav_six</item>
+    </array>
+
+</resources>
