@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.yoavst.changesystemohelshem"
+    android:versionCode="1"
+    android:versionName="0.1 ALPHA" >
+
+    <uses-sdk
+        android:minSdkVersion="10"
+        android:targetSdkVersion="19" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <application
+        android:name="com.yoavst.changesystemohelshem.MyApp_"
+        android:allowBackup="true"
+        android:hardwareAccelerated="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:launchMode="singleInstance"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name="com.yoavst.changesystemohelshem.activities.EnterActivity_"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.yoavst.changesystemohelshem.activities.MainActivity_"
+            android:label="@string/app_name" >
+        </activity>
+        <activity
+            android:name="com.yoavst.changesystemohelshem.activities.SetupActivity_"
+            android:label="@string/app_name" >
+        </activity>
+
+        <service
+            android:name="com.yoavst.changesystemohelshem.BackgroundService_"
+            android:enabled="true"
+            android:exported="false" >
+        </service>
+
+        <receiver
+            android:name="com.yoavst.changesystemohelshem.AlarmReceiver_"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="UPDATE_CHANGES" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name="com.yoavst.changesystemohelshem.BootReceiver_"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+    </application>
+
+</manifest>
