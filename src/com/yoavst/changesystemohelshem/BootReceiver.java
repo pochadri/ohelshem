@@ -37,8 +37,6 @@ public class BootReceiver extends BroadcastReceiver {
 			PendingIntent mPendingIntent = PendingIntent.getBroadcast(context,
 					0, mIntent, 0);
 			// Set alarm for 21:05
-			Calendar cur_cal = new GregorianCalendar();
-			cur_cal.setTimeInMillis(System.currentTimeMillis());
 			Calendar cal = new GregorianCalendar();
 			cal.set(Calendar.HOUR_OF_DAY, 21);
 			cal.set(Calendar.MINUTE, 05);

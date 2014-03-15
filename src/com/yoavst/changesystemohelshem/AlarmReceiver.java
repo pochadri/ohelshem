@@ -29,9 +29,15 @@ public class AlarmReceiver extends BroadcastReceiver {
 		cal.set(Calendar.MINUTE, 0);
 		cal.set(Calendar.SECOND, 0);
 		cal.set(Calendar.MILLISECOND, 0);
-		// if the day of the last notification is less then the current day
+		boolean isTomorrowHoliday = new Holidays().isTomorrowHoliday();
+		/*
+		 * If the day of the last notification is less then the current day And
+		 * the day isn't Friday
+		 */
 		if (mApp.getPreferences().getLastNotificationDay().get() < cal
-				.getTimeInMillis()) {
+				.getTimeInMillis()
+				&& cal.get(Calendar.DAY_OF_WEEK) != Calendar.FRIDAY
+				&& !isTomorrowHoliday) {
 			// Show the notification
 			BackgroundService_.IntentBuilder_ intentBuilder = BackgroundService_
 					.intent(context);

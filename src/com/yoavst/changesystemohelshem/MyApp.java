@@ -68,7 +68,8 @@ public class MyApp extends Application {
 	protected static String[] sQuestions;
 	private static int[] sAnswerIds = new int[] { R.raw.answer1, R.raw.answer2,
 			R.raw.answer3, R.raw.answer4, R.raw.answer5, R.raw.answer6,
-			R.raw.answer7, R.raw.answer8, R.raw.answer9, R.raw.answer10, R.raw.answer11 };
+			R.raw.answer7, R.raw.answer8, R.raw.answer9, R.raw.answer10,
+			R.raw.answer11 };
 
 	public void onCreate() {
 		super.onCreate();
