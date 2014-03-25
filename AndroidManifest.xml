@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.yoavst.changesystemohelshem"
-    android:versionCode="2"
-    android:versionName="0.5 BETA" >
+    android:versionCode="3"
+    android:versionName="0.9" >
 
     <uses-sdk
         android:minSdkVersion="10"
         android:targetSdkVersion="19" />
 
+    <!-- Need internet permission for downloading the changes -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Need network state permission to check if there is network connection before trying to connect -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Need to receive boot completed to set the alarm for 21:05 -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
