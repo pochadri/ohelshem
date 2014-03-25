@@ -52,8 +52,10 @@ public class ChangesListViewAdapter extends ArrayAdapter<ChangeObject> {
 		viewHolder.colorBorder.setBackgroundColor(values[position].getColor());
 		viewHolder.lessonNumber.setText(lessonNumber + " "
 				+ values[position].getLessonNumber());
-		viewHolder.change.setText(values[position].getChangeText().replace("-",
-				noChanges));
+		if (values[position].getChangeText().equals("-"))
+			viewHolder.change.setText(noChanges);
+		else
+			viewHolder.change.setText(values[position].getChangeText());
 		viewHolder.lesson.setText(values[position].getLesson());
 		return convertView;
 	}

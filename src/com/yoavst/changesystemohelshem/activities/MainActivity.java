@@ -1,6 +1,7 @@
 package com.yoavst.changesystemohelshem.activities;
 
 import java.util.ArrayList;
+
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.OnNavigationListener;
 import com.actionbarsherlock.app.SherlockFragment;
@@ -25,6 +26,9 @@ import com.yoavst.changesystemohelshem.R;
 import com.yoavst.changesystemohelshem.fragments.ChangesFragment;
 import com.yoavst.changesystemohelshem.fragments.ChangesFragment_;
 import com.yoavst.changesystemohelshem.fragments.HelpFragment_;
+
+import fr.nicolaspomepuy.discreetapprate.AppRate;
+import fr.nicolaspomepuy.discreetapprate.RetryPolicy;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -156,6 +160,25 @@ public class MainActivity extends SherlockFragmentActivity implements
 			setLastUpdated(mApp.getLastUpdateDay(mCurrentLayer),
 					mApp.getsLastTime(mCurrentLayer));
 		}
+		// Discreet app rate request
+		AppRate.with(this).initialLaunchCount(5)
+				.retryPolicy(RetryPolicy.INCREMENTAL)
+				.listener(new AppRate.OnShowListener() {
+					@Override
+					public void onRateAppClicked() {
+						// Don't show it anymore
+						AppRate.with(MainActivity.this).neverShowAgain();
+					}
+
+					@Override
+					public void onRateAppDismissed() {
+					}
+
+					@Override
+					public void onRateAppShowing() {
+
+					}
+				}).checkAndShow();
 
 	}
 
@@ -220,6 +243,8 @@ public class MainActivity extends SherlockFragmentActivity implements
 		case 5:
 			// Hide the panel of last update
 			mPane.setVisibility(View.GONE);
+			// Update global state
+			mActivityInfo = ActivityModes.Help;
 			// Create the Fragment and show it
 			SherlockFragment fragment = HelpFragment_.builder().build();
 			mFragmentManager.beginTransaction()
@@ -331,19 +356,21 @@ public class MainActivity extends SherlockFragmentActivity implements
 	 */
 	@OptionsItem(R.id.action_refresh)
 	void refreshSelected() {
-		// get the current shown fragment
+		// Get the current shown fragment
 		SherlockFragment fragment = (SherlockFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.content_frame);
 		if (fragment instanceof ChangesFragment_) {
-			// if there is internet connection
+			// If there is internet connection
 			if (mApp.isNetworkAvailable()) {
-				// show loading message
+				// Show loading message
 				((ChangesFragment) fragment).showLoadingMessage(getResources()
 						.getString(R.string.loading_message));
-				// download the changes
+				// Hide the "no changes" textview
+				((ChangesFragment) fragment).setVisibiltyForNoChanges(View.GONE);
+				// Download the changes
 				mApp.updateChanges(((ChangesFragment) fragment).getLayer());
 			} else {
-				// show error of no connection
+				// Show error of no connection
 				((ChangesFragment) fragment).showErrorMessage(getResources()
 						.getString(R.string.no_connection), false, null);
 			}
@@ -363,8 +390,7 @@ public class MainActivity extends SherlockFragmentActivity implements
 				((ChangesFragment) fragment).showChanges(changes);
 			else
 				// show empty message (because there are no changes)
-				((ChangesFragment) fragment).showEmptyMessage(getResources()
-						.getString(R.string.no_changes));
+				((ChangesFragment) fragment).showEmptyMessageOrTimetable();
 			setLastUpdated(mApp.getLastUpdateDay(layer),
 					mApp.getsLastTime(layer));
 		}

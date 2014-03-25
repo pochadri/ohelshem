@@ -96,8 +96,8 @@ public class SetupActivity extends SherlockFragmentActivity implements
 					}
 					mPrefs.getLayer().put(mLayer);
 					mPrefs.getMotherClass().put(
-							Integer.parseInt(classAndLayer
-									.substring(classAndLayer.length() - 1)));
+							Integer.parseInt(classAndLayer.replace(mClasses[mLayer-9],
+									"").replace("'","")));
 					mPrefs.getNotification().put(
 							(reviewItems
 									.get(2)
@@ -122,9 +122,10 @@ public class SetupActivity extends SherlockFragmentActivity implements
 						cal.set(Calendar.HOUR_OF_DAY, 21);
 						cal.set(Calendar.MINUTE, 05);
 						((AlarmManager) SetupActivity.this
-								.getSystemService(Context.ALARM_SERVICE)).setRepeating(
-								AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), 86400000l,
-								mPendingIntent);
+								.getSystemService(Context.ALARM_SERVICE))
+								.setRepeating(AlarmManager.RTC_WAKEUP,
+										cal.getTimeInMillis(), 86400000l,
+										mPendingIntent);
 					}
 					finish();
 

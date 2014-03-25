@@ -34,7 +34,6 @@ public class Holidays {
 		mHolidays.add(new Holiday("19/05/2014")); // Lag BaOmer 2014
 		mHolidays.add(new Holiday("03/05/2014", "06/05/2014")); // Shavuot 2014
 		mHolidays.add(new Holiday("21/06/2014", "26/08/2014")); // Summer
-																// vacation 2014
 	}
 
 	/**
@@ -87,7 +86,7 @@ public class Holidays {
 	/**
 	 * @return Calander without the hours, minutes, seconds and miliseconds
 	 */
-	public Calendar getDayOnly(Calendar cal) {
+	public static Calendar getDayOnly(Calendar cal) {
 		cal.set(Calendar.HOUR_OF_DAY, 0);
 		cal.set(Calendar.MINUTE, 0);
 		cal.set(Calendar.SECOND, 0);

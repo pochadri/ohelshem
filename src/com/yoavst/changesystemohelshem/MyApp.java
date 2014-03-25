@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -92,44 +93,84 @@ public class MyApp extends Application {
 			Gson gson = new Gson();
 			Type listType = new TypeToken<ArrayList<ArrayList<ChangeObject>>>() {
 			}.getType();
+			Calendar cal = Holidays.getDayOnly(Calendar.getInstance());
+			long miliOfDay = cal.getTimeInMillis();
+			cal.add(Calendar.DAY_OF_MONTH, 1);
+			long tomorrowMili = cal.getTimeInMillis();
 			// if the hour is later then 21, then the changes may be changed.
 			// Therefore, it won't show you changes between 21:00 to 24:00.
 			if (hours >= 21) {
 				cleanCache();
 			} else {
 				// Check if the changes for all the layers is saved, and if they
-				// are - restore them.
+				// are - restore them if there are up to date.
 				if (mPrefs.getJsonOfLayerNine().exists()
 						&& mPrefs.getJsonOfLayerNine().getOr("").length() > 1) {
-					sChangesForNine = gson.fromJson(mPrefs.getJsonOfLayerNine()
-							.get(), listType);
-					sLastUpdated[0] = mPrefs.LayerNineUpdatedWhen().get();
-					sLastTime[0] = getDateFormated(mPrefs
-							.LayerNineUpdatedFrom().get());
+					long LayerNineUpdatedFrom = mPrefs.LayerNineUpdatedFrom()
+							.get();
+					if (LayerNineUpdatedFrom == miliOfDay
+							|| LayerNineUpdatedFrom == tomorrowMili) {
+						sChangesForNine = gson.fromJson(mPrefs
+								.getJsonOfLayerNine().get(), listType);
+						sLastUpdated[0] = mPrefs.LayerNineUpdatedWhen().get();
+						sLastTime[0] = getDateFormated(mPrefs
+								.LayerNineUpdatedFrom().get());
+					} else {
+						mPrefs.getJsonOfLayerNine().put("");
+						mPrefs.LayerNineUpdatedWhen().put(0);
+						mPrefs.LayerNineUpdatedFrom().put(0);
+					}
 				}
 				if (mPrefs.getJsonOfLayerTen().exists()
 						&& mPrefs.getJsonOfLayerTen().getOr("").length() > 1) {
-					sChangesForTen = gson.fromJson(mPrefs.getJsonOfLayerTen()
-							.get(), listType);
-					sLastUpdated[1] = mPrefs.LayerTenUpdatedWhen().get();
-					sLastTime[1] = getDateFormated(mPrefs.LayerTenUpdatedFrom()
-							.get());
+					long LayerTenUpdatedFrom = mPrefs.LayerNineUpdatedFrom()
+							.get();
+					if (LayerTenUpdatedFrom == miliOfDay
+							|| LayerTenUpdatedFrom == tomorrowMili) {
+						sChangesForTen = gson.fromJson(mPrefs
+								.getJsonOfLayerTen().get(), listType);
+						sLastUpdated[1] = mPrefs.LayerTenUpdatedWhen().get();
+						sLastTime[1] = getDateFormated(mPrefs
+								.LayerTenUpdatedFrom().get());
+					} else {
+						mPrefs.getJsonOfLayerTen().put("");
+						mPrefs.LayerTenUpdatedWhen().put(0);
+						mPrefs.LayerTenUpdatedFrom().put(0);
+					}
 				}
 				if (mPrefs.getJsonOfLayerEleven().exists()
 						&& mPrefs.getJsonOfLayerEleven().getOr("").length() > 1) {
-					sChangesForEleven = gson.fromJson(mPrefs
-							.getJsonOfLayerEleven().get(), listType);
-					sLastUpdated[2] = mPrefs.LayerElevenUpdatedWhen().get();
-					sLastTime[2] = getDateFormated(mPrefs
-							.LayerElevenUpdatedFrom().get());
+					long LayerElevenUpdatedFrom = mPrefs.LayerNineUpdatedFrom()
+							.get();
+					if (LayerElevenUpdatedFrom == miliOfDay
+							|| LayerElevenUpdatedFrom == tomorrowMili) {
+						sChangesForEleven = gson.fromJson(mPrefs
+								.getJsonOfLayerEleven().get(), listType);
+						sLastUpdated[2] = mPrefs.LayerElevenUpdatedWhen().get();
+						sLastTime[2] = getDateFormated(mPrefs
+								.LayerElevenUpdatedFrom().get());
+					} else {
+						mPrefs.getJsonOfLayerEleven().put("");
+						mPrefs.LayerElevenUpdatedWhen().put(0);
+						mPrefs.LayerElevenUpdatedFrom().put(0);
+					}
 				}
 				if (mPrefs.getJsonOfLayerTwelve().exists()
 						&& mPrefs.getJsonOfLayerTwelve().getOr("").length() > 1) {
-					sChangesForNine = gson.fromJson(mPrefs
-							.getJsonOfLayerTwelve().get(), listType);
-					sLastUpdated[3] = mPrefs.LayerTwelveUpdatedWhen().get();
-					sLastTime[3] = getDateFormated(mPrefs
-							.LayerTwelveUpdatedFrom().get());
+					long LayerTwelveUpdatedFrom = mPrefs.LayerNineUpdatedFrom()
+							.get();
+					if (LayerTwelveUpdatedFrom == miliOfDay
+							|| LayerTwelveUpdatedFrom == tomorrowMili) {
+						sChangesForNine = gson.fromJson(mPrefs
+								.getJsonOfLayerTwelve().get(), listType);
+						sLastUpdated[3] = mPrefs.LayerTwelveUpdatedWhen().get();
+						sLastTime[3] = getDateFormated(mPrefs
+								.LayerTwelveUpdatedFrom().get());
+					} else {
+						mPrefs.getJsonOfLayerTwelve().put("");
+						mPrefs.LayerTwelveUpdatedWhen().put(0);
+						mPrefs.LayerTwelveUpdatedFrom().put(0);
+					}
 				}
 				if (getChangesForLayer(mPrefs.getLayer().get()) != null
 						&& mListener != null)
@@ -169,6 +210,11 @@ public class MyApp extends Application {
 		GregorianCalendar cal = new GregorianCalendar();
 		cal.setTime(new Date(miliseconds));
 		return cal.get(Calendar.DAY_OF_WEEK);
+	}
+
+	public static int getDayOfWeek() {
+		Calendar calendar = Calendar.getInstance();
+		return calendar.get(Calendar.DAY_OF_WEEK);
 	}
 
 	/**
@@ -246,7 +292,24 @@ public class MyApp extends Application {
 
 	public int getDayOfWeekFromLayerLastUpdate(int layer) {
 		return getDayOfWeekByMili(sLastUpdated[layer - 9]);
+	}
 
+	public int getDayOfWeekFromLayerLastUpdateChangeTime(int layer) {
+		if (layer >= 9 && layer <= 13) {
+			String date = sLastTime[layer - 9];
+			if (date == null || date.equals(""))
+				return 0;
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat(
+					"dd/MM/yyyy", Locale.ROOT);
+			long miliseconds = 0;
+			try {
+				miliseconds = simpleDateFormat.parse(date).getTime();
+			} catch (ParseException e) {
+				return 0;
+			}
+			return getDayOfWeekByMili(miliseconds);
+		}
+		return 0;
 	}
 
 	public String getLastUpdateDay(int layer) {

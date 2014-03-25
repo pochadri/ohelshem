@@ -25,6 +25,8 @@
     <string name="last_updated_subtitle">עודכן לאחרונה בתאריך</string>
     <string name="never_updated">עדיין לא עודכן</string>
     <string name="lesson_number">שיעור מספר</string>
+    <!--  Override the empty button -->
+    <string name="empty_button">הראה מערכת שעות</string>
 
     <string-array name="navigation_titles">
         <item>השינויים שלי</item>
