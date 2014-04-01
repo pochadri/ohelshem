@@ -1,6 +1,7 @@
 package com.yoavst.changesystemohelshem;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -91,7 +92,7 @@ public class BackgroundService extends IntentService {
 	@Override
 	protected void onHandleIntent(Intent intent) {
 		// Get extras
-		mLayer = intent.getIntExtra("layer", 9);
+		mLayer = intent.getIntExtra("layer", -1);
 		mClass = intent.getIntExtra("class", 4);
 		mDownloadService = intent.getBooleanExtra("download", true);
 		// If the layer is invalid
@@ -179,7 +180,11 @@ public class BackgroundService extends IntentService {
 				}
 				// Publish the results
 				publishResults(changes, baseDate, miliseconds);
+			} catch (SocketTimeoutException e) {
+				// Cannot connect the school site
+				connectionError();
 			} catch (IOException e) {
+				// Another IOException
 				e.printStackTrace();
 			}
 
@@ -215,7 +220,14 @@ public class BackgroundService extends IntentService {
 		mApp.setChangesForLayer(changes, mLayer, dateToShow, day);
 
 	}
-
+	/**
+	 * Should be called if there is error with the connection 
+	 */
+	private void connectionError() {
+		if (mDownloadService)
+			mApp.showError();
+	}
+	
 	/**
 	 * Show notification
 	 * 

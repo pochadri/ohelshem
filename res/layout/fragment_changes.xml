@@ -1,27 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" 
-    android:id="@+id/layout">
+    android:layout_height="match_parent" >
 
-    <ListView
-        android:id="@+id/lessons"
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/refresh_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/nochanges" />
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true" >
+
+        <ListView
+            android:id="@+id/lessons"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </android.support.v4.widget.SwipeRefreshLayout>
 
     <TextView
         android:id="@+id/nochanges"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
         android:background="@color/holo_blue"
         android:gravity="center_horizontal"
         android:text="@string/no_changes"
         android:textColor="@color/white"
+        android:visibility="gone" />
+    
+    <TextView
+        android:id="@+id/cached"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:background="@color/holo_blue"
+        android:gravity="center_horizontal"
+        android:text="@string/cached"
+        android:textColor="@color/white"
+        android:visibility="gone" />
+
+    <RelativeLayout
+        android:id="@+id/layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:visibility="gone" >
+
+        <Button
+            android:id="@+id/showtimetable"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text="@string/empty_button" />
+
+        <Button
+            android:id="@+id/refreshbutton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:text="@string/action_refresh" />
+    </RelativeLayout>
+
+    <Button
+        android:id="@+id/refreshbuttonoutside"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:text="@string/action_refresh"
         android:visibility="gone" />
 
 </RelativeLayout>

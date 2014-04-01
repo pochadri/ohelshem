@@ -16,6 +16,8 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 
+import javax.annotation.Nullable;
+
 import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.EApplication;
 import org.androidannotations.annotations.UiThread;
@@ -40,21 +42,47 @@ import android.net.ConnectivityManager;
  */
 @EApplication
 public class MyApp extends Application {
-	public interface UpdateChanges {
-		void onUpdateChangesCompleted(
-				ArrayList<ArrayList<ChangeObject>> changes, int layer);
-	}
-
 	@Pref
 	protected Prefs_ mPrefs;
-	private static ArrayList<ArrayList<ChangeObject>> sChangesForNine;
-	private static ArrayList<ArrayList<ChangeObject>> sChangesForTen;
-	private static ArrayList<ArrayList<ChangeObject>> sChangesForEleven;
-	private static ArrayList<ArrayList<ChangeObject>> sChangesForTwelve;
+	/**
+	 * The changes of the whole school. <br>
+	 * Level 1: Layer -> 0-3 <br>
+	 * Level 2: Class -> 0-10 or 0-11 <br>
+	 * Level 3: Hour -> 0-9 <br>
+	 * Each change is being represented as {@link ChangeObject}
+	 */
+	private static ArrayList<ArrayList<ArrayList<ChangeObject>>> sChanges = new ArrayList<ArrayList<ArrayList<ChangeObject>>>(
+			4);
+	/**
+	 * The timetable of the whole school, loaded from json. <br>
+	 * Level 1: Layer -> 0-3 <br>
+	 * Level 2: Class -> 0-10 or 0-11 <br>
+	 * Level 3: Day -> 0-6 <br>
+	 * Level 4: Hour -> 0-9
+	 * 
+	 * @see DownloadTimetable
+	 */
 	private static String[][][][] sTimetable;
+	/**
+	 * The time in miliseconds of when the changes was taken.
+	 */
 	private static long[] sLastUpdated = new long[] { 0, 0, 0, 0 };
+	/**
+	 * The time of the changes, formatted as "31/12/2014"
+	 */
 	private static String[] sLastTime = new String[] { "", "", "", "" };
-	private UpdateChanges mListener;
+	/**
+	 * Listener for events belongs to update changes.
+	 * 
+	 * @see UpdateChanges
+	 */
+	private static UpdateChanges mListener;
+	/**
+	 * Info about every layer - are the changes empty For making the
+	 * application. <br>
+	 * more effective, since it would not require the application to check each
+	 * class every time.
+	 */
 	private boolean[] mIsLayerEmpty = new boolean[] { false, false, false,
 			false };
 
@@ -64,21 +92,49 @@ public class MyApp extends Application {
 	 * started
 	 */
 	private static Card[] sCards = new Card[11];
+	/**
+	 * The answers of the cards. Will be {@link #sAnswerIds} but html formatted.
+	 */
 	private static String[] sAnswers = new String[11];
+	/**
+	 * The questions of the cards.
+	 */
 	@StringArrayRes(R.array.questions)
 	protected static String[] sQuestions;
+	/**
+	 * The answer ids of the cards.
+	 */
 	private static int[] sAnswerIds = new int[] { R.raw.answer1, R.raw.answer2,
 			R.raw.answer3, R.raw.answer4, R.raw.answer5, R.raw.answer6,
 			R.raw.answer7, R.raw.answer8, R.raw.answer9, R.raw.answer10,
 			R.raw.answer11 };
 
+	// Android methods:
+
 	public void onCreate() {
 		super.onCreate();
+		// Put 4 items so it will not throw ArrayIndexOutOfBoundsException
+		for (int i = 1; i <= 4; i++)
+			sChanges.add(null);
 		init();
 	}
 
+	// Private methods:
+	/**
+	 * Init the application.
+	 * <ul>
+	 * <li>Convert the json to {@link #sTimetable timetable} array.
+	 * <li>Update changes.
+	 * <li>Check the cached data.
+	 * <li>Load the question's {@link #sCards cards}.
+	 * </ul>
+	 * 
+	 * @see #cleanCache()
+	 * @see #updateChanges(layer)
+	 */
+	@SuppressWarnings("unchecked")
 	@Background
-	void init() {
+	protected void init() {
 		// Get the timetable from file
 		String json = MyApp.readRaw(this, R.raw.timetable);
 		// Convert it from JSON to String array
@@ -93,100 +149,51 @@ public class MyApp extends Application {
 			Gson gson = new Gson();
 			Type listType = new TypeToken<ArrayList<ArrayList<ChangeObject>>>() {
 			}.getType();
-			Calendar cal = Holidays.getDayOnly(Calendar.getInstance());
-			long miliOfDay = cal.getTimeInMillis();
-			cal.add(Calendar.DAY_OF_MONTH, 1);
-			long tomorrowMili = cal.getTimeInMillis();
 			// if the hour is later then 21, then the changes may be changed.
-			// Therefore, it won't show you changes between 21:00 to 24:00.
+			// Therefore, it won't show you the cached changes between 21:00 to
+			// 24:00.
 			if (hours >= 21) {
 				cleanCache();
 			} else {
 				// Check if the changes for all the layers is saved, and if they
 				// are - restore them if there are up to date.
-				if (mPrefs.getJsonOfLayerNine().exists()
-						&& mPrefs.getJsonOfLayerNine().getOr("").length() > 1) {
-					long LayerNineUpdatedFrom = mPrefs.LayerNineUpdatedFrom()
-							.get();
-					if (LayerNineUpdatedFrom == miliOfDay
-							|| LayerNineUpdatedFrom == tomorrowMili) {
-						sChangesForNine = gson.fromJson(mPrefs
-								.getJsonOfLayerNine().get(), listType);
-						sLastUpdated[0] = mPrefs.LayerNineUpdatedWhen().get();
-						sLastTime[0] = getDateFormated(mPrefs
-								.LayerNineUpdatedFrom().get());
-					} else {
-						mPrefs.getJsonOfLayerNine().put("");
-						mPrefs.LayerNineUpdatedWhen().put(0);
-						mPrefs.LayerNineUpdatedFrom().put(0);
+				for (int layer = 9; layer <= 12; layer++) {
+					if (isCacheExsistsForLayer(layer)) {
+						if (isChangesUpdatedForLayer(layer)) {
+							setChangesForLayer(layer,
+									(ArrayList<ArrayList<ChangeObject>>) gson
+											.fromJson(
+													mPrefs.getJsonOfLayerNine()
+															.get(), listType));
+							sLastUpdated[layer - 9] = getLayerLastUpdatedWhen(layer);
+							sLastTime[layer - 9] = getDateFormated(getLayerLastUpdatedFrom(layer));
+						} else {
+							cleanCacheForLayer(layer);
+						}
 					}
 				}
-				if (mPrefs.getJsonOfLayerTen().exists()
-						&& mPrefs.getJsonOfLayerTen().getOr("").length() > 1) {
-					long LayerTenUpdatedFrom = mPrefs.LayerNineUpdatedFrom()
-							.get();
-					if (LayerTenUpdatedFrom == miliOfDay
-							|| LayerTenUpdatedFrom == tomorrowMili) {
-						sChangesForTen = gson.fromJson(mPrefs
-								.getJsonOfLayerTen().get(), listType);
-						sLastUpdated[1] = mPrefs.LayerTenUpdatedWhen().get();
-						sLastTime[1] = getDateFormated(mPrefs
-								.LayerTenUpdatedFrom().get());
-					} else {
-						mPrefs.getJsonOfLayerTen().put("");
-						mPrefs.LayerTenUpdatedWhen().put(0);
-						mPrefs.LayerTenUpdatedFrom().put(0);
-					}
-				}
-				if (mPrefs.getJsonOfLayerEleven().exists()
-						&& mPrefs.getJsonOfLayerEleven().getOr("").length() > 1) {
-					long LayerElevenUpdatedFrom = mPrefs.LayerNineUpdatedFrom()
-							.get();
-					if (LayerElevenUpdatedFrom == miliOfDay
-							|| LayerElevenUpdatedFrom == tomorrowMili) {
-						sChangesForEleven = gson.fromJson(mPrefs
-								.getJsonOfLayerEleven().get(), listType);
-						sLastUpdated[2] = mPrefs.LayerElevenUpdatedWhen().get();
-						sLastTime[2] = getDateFormated(mPrefs
-								.LayerElevenUpdatedFrom().get());
-					} else {
-						mPrefs.getJsonOfLayerEleven().put("");
-						mPrefs.LayerElevenUpdatedWhen().put(0);
-						mPrefs.LayerElevenUpdatedFrom().put(0);
-					}
-				}
-				if (mPrefs.getJsonOfLayerTwelve().exists()
-						&& mPrefs.getJsonOfLayerTwelve().getOr("").length() > 1) {
-					long LayerTwelveUpdatedFrom = mPrefs.LayerNineUpdatedFrom()
-							.get();
-					if (LayerTwelveUpdatedFrom == miliOfDay
-							|| LayerTwelveUpdatedFrom == tomorrowMili) {
-						sChangesForNine = gson.fromJson(mPrefs
-								.getJsonOfLayerTwelve().get(), listType);
-						sLastUpdated[3] = mPrefs.LayerTwelveUpdatedWhen().get();
-						sLastTime[3] = getDateFormated(mPrefs
-								.LayerTwelveUpdatedFrom().get());
-					} else {
-						mPrefs.getJsonOfLayerTwelve().put("");
-						mPrefs.LayerTwelveUpdatedWhen().put(0);
-						mPrefs.LayerTwelveUpdatedFrom().put(0);
-					}
-				}
+				// If the changes are not null and there is a listener attached
 				if (getChangesForLayer(mPrefs.getLayer().get()) != null
 						&& mListener != null)
+					// Nofity the listneer about the changes
 					mListener.onUpdateChangesCompleted(
 							getChangesForLayer(mPrefs.getLayer().get()), mPrefs
 									.getLayer().get());
 			}
 		}
+		// Load the answers
 		for (int i = 0; i < sAnswerIds.length; i++) {
 			sAnswers[i] = readRaw(this, sAnswerIds[i]);
 		}
+		// Init the cards
 		initCards();
 	}
 
+	/**
+	 * Create card from each Q&A that can be expanded inside.
+	 */
 	@Background
-	void initCards() {
+	protected void initCards() {
 		for (int i = 0; i < sAnswerIds.length; i++) {
 			// Create Card
 			sCards[i] = new Card(this);
@@ -204,14 +211,198 @@ public class MyApp extends Application {
 	}
 
 	/**
-	 * @return the day of the week by miliseconds from 1/1/1970
+	 * Set the changes for the specific layer.
+	 * 
+	 * @param layer
+	 *            the layer
+	 * @param changes
+	 *            the changes
+	 */
+	private void setChangesForLayer(int layer,
+			@Nullable ArrayList<ArrayList<ChangeObject>> changes) {
+		sChanges.set(layer - 9, changes);
+	}
+
+	/**
+	 * @param layer
+	 *            the layer
+	 * @return true if the changes of layer are stored in preferences
+	 */
+	private boolean isCacheExsistsForLayer(int layer) {
+		switch (layer) {
+		case 9:
+			return (mPrefs.getJsonOfLayerNine().exists() && mPrefs
+					.getJsonOfLayerNine().getOr("").length() > 1);
+		case 10:
+			return (mPrefs.getJsonOfLayerTen().exists() && mPrefs
+					.getJsonOfLayerTen().getOr("").length() > 1);
+		case 11:
+			return (mPrefs.getJsonOfLayerEleven().exists() && mPrefs
+					.getJsonOfLayerEleven().getOr("").length() > 1);
+		case 12:
+			return (mPrefs.getJsonOfLayerTwelve().exists() && mPrefs
+					.getJsonOfLayerTwelve().getOr("").length() > 1);
+		default:
+			return false;
+		}
+	}
+
+	private Long getLayerLastUpdatedWhen(int layer) {
+		switch (layer) {
+		case 9:
+			return mPrefs.LayerNineUpdatedWhen().getOr(-2);
+		case 10:
+			return mPrefs.LayerTenUpdatedWhen().getOr(-2);
+		case 11:
+			return mPrefs.LayerElevenUpdatedWhen().getOr(-2);
+		case 12:
+			return mPrefs.LayerTwelveUpdatedWhen().getOr(-2);
+		default:
+			return -1l;
+		}
+	}
+
+	private Long getLayerLastUpdatedFrom(int layer) {
+		switch (layer) {
+		case 9:
+			return mPrefs.LayerNineUpdatedFrom().getOr(-2);
+		case 10:
+			return mPrefs.LayerTenUpdatedFrom().getOr(-2);
+		case 11:
+			return mPrefs.LayerElevenUpdatedFrom().getOr(-2);
+		case 12:
+			return mPrefs.LayerTwelveUpdatedFrom().getOr(-2);
+		default:
+			return -1l;
+		}
+	}
+
+	/**
+	 * Clear all the cached data from preferences
+	 */
+	private void cleanCache() {
+		for (int i = 9; i <= 12; i++)
+			cleanCacheForLayer(9);
+	}
+
+	/**
+	 * Clean cache for specific layer
+	 * 
+	 * @param layer
+	 *            the layer
+	 */
+	private void cleanCacheForLayer(int layer) {
+		putLayerLastUpdatedData(layer, "", 0, 0);
+	}
+
+	/**
+	 * Update layer's cached data. If json is null then it will not change it.
+	 * 
+	 * @param layer
+	 *            the layer
+	 * @param json
+	 *            the changes in json format
+	 * @param when
+	 *            the specific time it taken in miliseconds
+	 * @param from
+	 *            the date in miliseconds
+	 */
+	private void putLayerLastUpdatedData(int layer, @Nullable String json,
+			long when, long from) {
+		switch (layer) {
+		case 9:
+			if (json != null)
+				mPrefs.getJsonOfLayerNine().put(json);
+			mPrefs.LayerNineUpdatedWhen().put(when);
+			mPrefs.LayerNineUpdatedFrom().put(from);
+			break;
+		case 10:
+			if (json != null)
+				mPrefs.getJsonOfLayerTen().put(json);
+			mPrefs.LayerTenUpdatedWhen().put(when);
+			mPrefs.LayerTenUpdatedFrom().put(from);
+			break;
+		case 11:
+			if (json != null)
+				mPrefs.getJsonOfLayerEleven().put(json);
+			mPrefs.LayerElevenUpdatedWhen().put(when);
+			mPrefs.LayerElevenUpdatedFrom().put(from);
+			break;
+		case 12:
+			if (json != null)
+				mPrefs.getJsonOfLayerTwelve().put(json);
+			mPrefs.LayerTwelveUpdatedWhen().put(when);
+			mPrefs.LayerTwelveUpdatedFrom().put(from);
+			break;
+		}
+	}
+
+	// Public methods:
+
+	/**
+	 * @return the ArrayList of changes for the given layer
+	 */
+	public ArrayList<ArrayList<ChangeObject>> getChangesForLayer(int layer) {
+		return sChanges.get(layer - 9);
+	}
+
+	/**
+	 * @param layer
+	 * @return true if the changes are the changes of today or tomorrow
+	 */
+	public boolean isChangesUpdatedForLayer(int layer) {
+		Calendar cal = Holidays.getDayOnly(Calendar.getInstance());
+		long miliOfDay = cal.getTimeInMillis();
+		cal.add(Calendar.DAY_OF_MONTH, 1);
+		long tomorrowMili = cal.getTimeInMillis();
+		switch (layer) {
+		case 9:
+			long LayerNineUpdatedFrom = mPrefs.LayerNineUpdatedFrom().get();
+			if (LayerNineUpdatedFrom == miliOfDay
+					|| LayerNineUpdatedFrom == tomorrowMili) {
+				return true;
+			}
+			break;
+		case 10:
+			long LayerTenUpdatedFrom = mPrefs.LayerNineUpdatedFrom().get();
+			if (LayerTenUpdatedFrom == miliOfDay
+					|| LayerTenUpdatedFrom == tomorrowMili) {
+				return true;
+			}
+			break;
+		case 11:
+			long LayerElevenUpdatedFrom = mPrefs.LayerNineUpdatedFrom().get();
+			if (LayerElevenUpdatedFrom == miliOfDay
+					|| LayerElevenUpdatedFrom == tomorrowMili) {
+				return true;
+			}
+			break;
+		case 12:
+			long LayerTwelveUpdatedFrom = mPrefs.LayerNineUpdatedFrom().get();
+			if (LayerTwelveUpdatedFrom == miliOfDay
+					|| LayerTwelveUpdatedFrom == tomorrowMili) {
+				return true;
+			}
+			break;
+		default:
+			return false;
+		}
+		return false;
+	}
+
+	/**
+	 * @return the day of the week by miliseconds from 1/1/1970.
 	 */
 	public static int getDayOfWeekByMili(long miliseconds) {
 		GregorianCalendar cal = new GregorianCalendar();
 		cal.setTime(new Date(miliseconds));
-		return cal.get(Calendar.DAY_OF_WEEK);
+		int day = cal.get(Calendar.DAY_OF_WEEK);
+		return day;
 	}
 
+	/**
+	 * @return the day of the week
+	 */
 	public static int getDayOfWeek() {
 		Calendar calendar = Calendar.getInstance();
 		return calendar.get(Calendar.DAY_OF_WEEK);
@@ -221,6 +412,8 @@ public class MyApp extends Application {
 	 * @return the text of the given raw resource
 	 */
 	public static String readRaw(Context ctx, int res_id) {
+		if (ctx == null)
+			return "error";
 		String alltext = "";
 		InputStream is = ctx.getResources().openRawResource(res_id);
 		InputStreamReader isr = new InputStreamReader(is);
@@ -246,42 +439,18 @@ public class MyApp extends Application {
 	}
 
 	/**
-	 * Clear all the cached data from preferences
+	 * Nofity the listener that there is an error.
 	 */
-	public void cleanCache() {
-		mPrefs.getJsonOfLayerNine().put("");
-		mPrefs.LayerNineUpdatedWhen().put(0);
-		mPrefs.LayerNineUpdatedFrom().put(0);
-		mPrefs.getJsonOfLayerTen().put("");
-		mPrefs.LayerTenUpdatedWhen().put(0);
-		mPrefs.LayerTenUpdatedFrom().put(0);
-		mPrefs.getJsonOfLayerEleven().put("");
-		mPrefs.LayerElevenUpdatedWhen().put(0);
-		mPrefs.LayerElevenUpdatedFrom().put(0);
-		mPrefs.getJsonOfLayerTwelve().put("");
-		mPrefs.LayerTwelveUpdatedWhen().put(0);
-		mPrefs.LayerTwelveUpdatedFrom().put(0);
-
+	public void showError() {
+		if (mListener != null)
+			mListener.showConnectionError();
 	}
 
 	/**
-	 * @return the ArrayList of changes for the given layer
+	 * @param miliseconds
+	 *            miliseconds from 1/1/1970
+	 * @return The data formatted as dd/MM/yyyy
 	 */
-	public ArrayList<ArrayList<ChangeObject>> getChangesForLayer(int layer) {
-		switch (layer) {
-		case 9:
-			return sChangesForNine;
-		case 10:
-			return sChangesForTen;
-		case 11:
-			return sChangesForEleven;
-		case 12:
-			return sChangesForTwelve;
-		default:
-			return null;
-		}
-	}
-
 	public String getDateFormated(long miliseconds) {
 		Date date = new Date(miliseconds);
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy",
@@ -295,6 +464,7 @@ public class MyApp extends Application {
 	}
 
 	public int getDayOfWeekFromLayerLastUpdateChangeTime(int layer) {
+		int toReturn = 0;
 		if (layer >= 9 && layer <= 13) {
 			String date = sLastTime[layer - 9];
 			if (date == null || date.equals(""))
@@ -307,9 +477,9 @@ public class MyApp extends Application {
 			} catch (ParseException e) {
 				return 0;
 			}
-			return getDayOfWeekByMili(miliseconds);
+			toReturn = getDayOfWeekByMili(miliseconds);
 		}
-		return 0;
+		return toReturn;
 	}
 
 	public String getLastUpdateDay(int layer) {
@@ -342,7 +512,9 @@ public class MyApp extends Application {
 	/**
 	 * @return true if all the items are "-" (all empty)
 	 */
-	public boolean isChangesEmpty(ArrayList<ChangeObject> changes) {
+	public boolean isChangesEmpty(@Nullable ArrayList<ChangeObject> changes) {
+		if (changes == null)
+			return true;
 		for (ChangeObject change : changes) {
 			if (!change.getChangeText().equals("-"))
 				return false;
@@ -370,38 +542,29 @@ public class MyApp extends Application {
 		return sCards;
 	}
 
+	/**
+	 * @param timetable
+	 *            the timetable
+	 * @return true if the timetable is empty
+	 */
+	public static boolean isTimetableEmpty(String[] timetable) {
+		for (String lesson : timetable) {
+			if (lesson != null && !lesson.equals(" ") && !lesson.equals("")
+					&& !lesson.equals("null"))
+				return false;
+		}
+		return true;
+	}
+
 	@UiThread
-	public void setChangesForLayer(ArrayList<ArrayList<ChangeObject>> changes,
-			int layer, String date, long day) {
+	public void setChangesForLayer(
+			@Nullable ArrayList<ArrayList<ChangeObject>> changes, int layer,
+			String date, long day) {
 		long time = new GregorianCalendar().getTimeInMillis();
 		sLastUpdated[layer - 9] = time;
 		String json = new Gson().toJson(changes);
-		switch (layer) {
-		case 9:
-			sChangesForNine = changes;
-			mPrefs.getJsonOfLayerNine().put(json);
-			mPrefs.LayerNineUpdatedWhen().put(time);
-			mPrefs.LayerNineUpdatedFrom().put(day);
-			break;
-		case 10:
-			sChangesForTen = changes;
-			mPrefs.getJsonOfLayerTen().put(json);
-			mPrefs.LayerTenUpdatedWhen().put(time);
-			mPrefs.LayerTenUpdatedFrom().put(day);
-			break;
-		case 11:
-			sChangesForEleven = changes;
-			mPrefs.getJsonOfLayerEleven().put(json);
-			mPrefs.LayerElevenUpdatedWhen().put(time);
-			mPrefs.LayerElevenUpdatedFrom().put(day);
-			break;
-		case 12:
-			sChangesForTwelve = changes;
-			mPrefs.getJsonOfLayerTwelve().put(json);
-			mPrefs.LayerTwelveUpdatedWhen().put(time);
-			mPrefs.LayerTwelveUpdatedFrom().put(day);
-			break;
-		}
+		setChangesForLayer(layer, changes);
+		putLayerLastUpdatedData(layer, json, time, day);
 		sLastTime[layer - 9] = date;
 		if (changes == null)
 			mIsLayerEmpty[layer - 9] = true;
@@ -416,6 +579,12 @@ public class MyApp extends Application {
 		mListener = listener;
 	}
 
+	/**
+	 * Update the changes of specific layer
+	 * 
+	 * @param layer
+	 *            the layer
+	 */
 	@UiThread
 	public void updateChanges(int layer) {
 		// Create IntentService for downloading changes
@@ -426,5 +595,26 @@ public class MyApp extends Application {
 				.putExtra(BackgroundService.DOWNLOAD_EXTRA, true);
 		// Start service
 		intentBuilder.start();
+	}
+
+	/**
+	 * The listener of update changes.
+	 */
+	public interface UpdateChanges {
+		/**
+		 * Will be called when downloading changes will be finished.
+		 * 
+		 * @param changes
+		 *            the changes or null if there are no changes.
+		 * @param layer
+		 *            the layer of the changes
+		 */
+		void onUpdateChangesCompleted(
+				@Nullable ArrayList<ArrayList<ChangeObject>> changes, int layer);
+
+		/**
+		 * Will be called when there is error.
+		 */
+		void showConnectionError();
 	}
 }

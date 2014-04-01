@@ -19,7 +19,7 @@ Also, you can read about what every class do [here](https://github.com/yoavst/oh
 * Jake Wharton for [ActionBar Sherlock](http://actionbarsherlock.com/).
 * Roman Nurik for [WizardPager](https://code.google.com/p/romannurik-code/source/browse/misc/wizardpager).
 * Alam Kanak for [Android Empty Layout](https://github.com/alamkanak/Android-Empty-Layout).
-* Google for Android and for [GSON](https://code.google.com/p/google-gson/).
+* Google for Android, Support V4 package and for [GSON](https://code.google.com/p/google-gson/).
 * Nick Frost for [the icons pack](https://www.iconfinder.com/search/?q=iconset:ballicons-free).
 
 License

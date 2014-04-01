@@ -210,7 +210,7 @@ public class MainActivity extends SherlockFragmentActivity implements
 			mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
 			mActionBar.setDisplayShowTitleEnabled(true);
 			// Clean the variables
-			mCurrentLayer = 0;
+			mCurrentLayer = mApp.getPreferences().getLayer().get();
 			mCurrentClass = 0;
 			mActivityInfo = ActivityModes.User;
 			// Build and show the Fragment
@@ -232,7 +232,7 @@ public class MainActivity extends SherlockFragmentActivity implements
 			// Update global state
 			mActivityInfo = ActivityModes.Layer;
 			// Show the spinner
-			showSpinner(position + 8);
+			showSpinner(mCurrentLayer);
 			// Select Item
 			showItemFromSpinner(1);
 			// Show the panel of last update
@@ -355,7 +355,7 @@ public class MainActivity extends SherlockFragmentActivity implements
 	 * On refresh on menu selected
 	 */
 	@OptionsItem(R.id.action_refresh)
-	void refreshSelected() {
+	public void refreshSelected() {
 		// Get the current shown fragment
 		SherlockFragment fragment = (SherlockFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.content_frame);
@@ -365,14 +365,20 @@ public class MainActivity extends SherlockFragmentActivity implements
 				// Show loading message
 				((ChangesFragment) fragment).showLoadingMessage(getResources()
 						.getString(R.string.loading_message));
+				// Save the time for the animation
+				((ChangesFragment) fragment).setMiliForAnimation(System
+						.currentTimeMillis());
+				((ChangesFragment) fragment).setRefreshing(true);
 				// Hide the "no changes" textview
-				((ChangesFragment) fragment).setVisibiltyForNoChanges(View.GONE);
+				((ChangesFragment) fragment)
+						.setVisibiltyForNoChanges(View.GONE);
 				// Download the changes
-				mApp.updateChanges(((ChangesFragment) fragment).getLayer());
+				mApp.updateChanges(mCurrentLayer);
 			} else {
 				// Show error of no connection
 				((ChangesFragment) fragment).showErrorMessage(getResources()
 						.getString(R.string.no_connection), false, null);
+				((ChangesFragment_) fragment).setVisiblityForTryAgainOutside(View.VISIBLE);
 			}
 		}
 	}
@@ -385,14 +391,12 @@ public class MainActivity extends SherlockFragmentActivity implements
 				.findFragmentById(R.id.content_frame);
 		// If the fragment is ChangesFragment_ (not help Fragment)
 		if (fragment != null && fragment instanceof ChangesFragment_) {
-			if (changes != null)
-				// show the changes
-				((ChangesFragment) fragment).showChanges(changes);
-			else
-				// show empty message (because there are no changes)
-				((ChangesFragment) fragment).showEmptyMessageOrTimetable();
+			// Show the changes
+			((ChangesFragment) fragment).showChanges(changes);
+			// Show last upate time
 			setLastUpdated(mApp.getLastUpdateDay(layer),
 					mApp.getsLastTime(layer));
+			// mRefreshLayout.setRefreshing(false);
 		}
 
 	}
@@ -419,4 +423,16 @@ public class MainActivity extends SherlockFragmentActivity implements
 		}
 	}
 
+	@Override
+	public void showConnectionError() {
+		// Get the fragment
+		SherlockFragment fragment = (SherlockFragment) getSupportFragmentManager()
+				.findFragmentById(R.id.content_frame);
+		// If the fragment is ChangesFragment_ (not help Fragment)
+		if (fragment != null && fragment instanceof ChangesFragment_) {
+			((ChangesFragment_) fragment).showErrorMessage(
+					getString(R.string.no_connection), false, null);
+			((ChangesFragment_) fragment).setVisiblityForTryAgainOutside(View.VISIBLE);
+		}
+	}
 }
