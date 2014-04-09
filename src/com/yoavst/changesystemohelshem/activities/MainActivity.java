@@ -2,33 +2,15 @@ package com.yoavst.changesystemohelshem.activities;
 
 import java.util.ArrayList;
 
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.ActionBar.OnNavigationListener;
-import com.actionbarsherlock.app.SherlockFragment;
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.App;
 import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.Extra;
 import org.androidannotations.annotations.InstanceState;
 import org.androidannotations.annotations.OptionsItem;
 import org.androidannotations.annotations.OptionsMenu;
 import org.androidannotations.annotations.ViewById;
 import org.androidannotations.annotations.res.StringArrayRes;
-
-import com.yoavst.changesystemohelshem.navigation.NavDrawerItem;
-import com.yoavst.changesystemohelshem.navigation.NavDrawerListAdapter;
-import com.yoavst.changesystemohelshem.ChangeObject;
-import com.yoavst.changesystemohelshem.CustomSpinnerAdapter;
-import com.yoavst.changesystemohelshem.MyApp;
-import com.yoavst.changesystemohelshem.Prefs_;
-import com.yoavst.changesystemohelshem.R;
-import com.yoavst.changesystemohelshem.fragments.ChangesFragment;
-import com.yoavst.changesystemohelshem.fragments.ChangesFragment_;
-import com.yoavst.changesystemohelshem.fragments.HelpFragment_;
-
-import fr.nicolaspomepuy.discreetapprate.AppRate;
-import fr.nicolaspomepuy.discreetapprate.RetryPolicy;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -42,6 +24,25 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.ActionBar.OnNavigationListener;
+import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.yoavst.changesystemohelshem.ChangeObject;
+import com.yoavst.changesystemohelshem.CustomSpinnerAdapter;
+import com.yoavst.changesystemohelshem.MyApp;
+import com.yoavst.changesystemohelshem.Prefs_;
+import com.yoavst.changesystemohelshem.R;
+import com.yoavst.changesystemohelshem.fragments.ChangesFragment;
+import com.yoavst.changesystemohelshem.fragments.ChangesFragment_;
+import com.yoavst.changesystemohelshem.fragments.HelpFragment_;
+import com.yoavst.changesystemohelshem.navigation.NavDrawerItem;
+import com.yoavst.changesystemohelshem.navigation.NavDrawerListAdapter;
+
+import fr.nicolaspomepuy.discreetapprate.AppRate;
+import fr.nicolaspomepuy.discreetapprate.RetryPolicy;
 
 /**
  * The Main Activity, where everything that the user should know about it
@@ -78,6 +79,8 @@ public class MainActivity extends SherlockFragmentActivity implements
 	int mCurrentClass;
 	@InstanceState
 	int mCurrentLayer;
+	@Extra("shouldRefresh")
+	boolean mShouldRefresh = false;
 	ActionBar mActionBar;
 	FragmentManager mFragmentManager;
 
@@ -99,7 +102,7 @@ public class MainActivity extends SherlockFragmentActivity implements
 				|| mPrefs.getMotherClass().getOr(0) < 1
 				|| mPrefs.getMotherClass().getOr(0) > 13) {
 			overridePendingTransition(0, 0);
-			startActivity(new Intent(this, SetupActivity_.class));
+			startActivity(new Intent(this, WizardActivity_.class));
 			finish();
 		}
 		// Set listener for download changes
@@ -111,10 +114,12 @@ public class MainActivity extends SherlockFragmentActivity implements
 				mDrawerLayout, R.drawable.ic_drawer, R.string.app_name,
 				R.string.app_name) {
 			// Do nothing
+			@Override
 			public void onDrawerClosed(View view) {
 			}
 
 			// Do nothing
+			@Override
 			public void onDrawerOpened(View drawerView) {
 			}
 		};
@@ -160,6 +165,8 @@ public class MainActivity extends SherlockFragmentActivity implements
 			setLastUpdated(mApp.getLastUpdateDay(mCurrentLayer),
 					mApp.getsLastTime(mCurrentLayer));
 		}
+		if (mShouldRefresh)
+			refreshSelected();
 		// Discreet app rate request
 		AppRate.with(this).initialLaunchCount(5)
 				.retryPolicy(RetryPolicy.INCREMENTAL)
@@ -179,7 +186,6 @@ public class MainActivity extends SherlockFragmentActivity implements
 
 					}
 				}).checkAndShow();
-
 	}
 
 	/**
@@ -346,7 +352,7 @@ public class MainActivity extends SherlockFragmentActivity implements
 	@OptionsItem(R.id.action_settings)
 	void settingsSelected() {
 		// Start settings (setup but with back button to this) Activity.
-		SetupActivity_.intent(this).mIsSettings(true).start();
+		WizardActivity_.intent(this).mIsSettings(true).start();
 		// Finish this to avoid this activity being shown twice
 		finish();
 	}
@@ -359,26 +365,36 @@ public class MainActivity extends SherlockFragmentActivity implements
 		// Get the current shown fragment
 		SherlockFragment fragment = (SherlockFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.content_frame);
-		if (fragment instanceof ChangesFragment_) {
+		if (fragment instanceof ChangesFragment_ || mShouldRefresh) {
 			// If there is internet connection
 			if (mApp.isNetworkAvailable()) {
-				// Show loading message
-				((ChangesFragment) fragment).showLoadingMessage(getResources()
-						.getString(R.string.loading_message));
-				// Save the time for the animation
-				((ChangesFragment) fragment).setMiliForAnimation(System
-						.currentTimeMillis());
-				((ChangesFragment) fragment).setRefreshing(true);
-				// Hide the "no changes" textview
-				((ChangesFragment) fragment)
-						.setVisibiltyForNoChanges(View.GONE);
+				if (fragment instanceof ChangesFragment_) {
+					// Show loading message
+					((ChangesFragment) fragment)
+							.showLoadingMessage(getResources().getString(
+									R.string.loading_message));
+					// Save the time for the animation
+					((ChangesFragment) fragment).setMiliForAnimation(System
+							.currentTimeMillis());
+					((ChangesFragment) fragment).setRefreshing(true);
+					// Hide the "no changes" textview
+					((ChangesFragment) fragment)
+							.setVisibiltyForNoChanges(View.GONE);
+				}
 				// Download the changes
 				mApp.updateChanges(mCurrentLayer);
 			} else {
-				// Show error of no connection
-				((ChangesFragment) fragment).showErrorMessage(getResources()
-						.getString(R.string.no_connection), false, null);
-				((ChangesFragment_) fragment).setVisiblityForTryAgainOutside(View.VISIBLE);
+				if (fragment instanceof ChangesFragment_) {
+					// Show error of no connection
+					((ChangesFragment) fragment).showErrorMessage(
+							getResources().getString(R.string.no_connection),
+							false, null);
+					((ChangesFragment_) fragment)
+							.setVisiblityForTryAgainOutside(View.VISIBLE);
+				} else {
+					Toast.makeText(this, R.string.no_connection,
+							Toast.LENGTH_SHORT).show();
+				}
 			}
 		}
 	}
@@ -432,7 +448,8 @@ public class MainActivity extends SherlockFragmentActivity implements
 		if (fragment != null && fragment instanceof ChangesFragment_) {
 			((ChangesFragment_) fragment).showErrorMessage(
 					getString(R.string.no_connection), false, null);
-			((ChangesFragment_) fragment).setVisiblityForTryAgainOutside(View.VISIBLE);
+			((ChangesFragment_) fragment)
+					.setVisiblityForTryAgainOutside(View.VISIBLE);
 		}
 	}
 }

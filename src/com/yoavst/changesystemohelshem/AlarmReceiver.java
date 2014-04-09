@@ -1,12 +1,13 @@
 package com.yoavst.changesystemohelshem;
 
+import java.util.Calendar;
+
 import org.androidannotations.annotations.App;
 import org.androidannotations.annotations.EReceiver;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import java.util.Calendar;
 
 /**
  * Being called on 21:05 by the AlarmManager.
@@ -41,9 +42,9 @@ public class AlarmReceiver extends BroadcastReceiver {
 			// Show the notification
 			BackgroundService_.IntentBuilder_ intentBuilder = BackgroundService_
 					.intent(context);
-			intentBuilder.get().putExtra(BackgroundService_.LAYER_EXTRA,
+			intentBuilder.get().putExtra(BackgroundService.LAYER_EXTRA,
 					mApp.getPreferences().getLayer().get());
-			intentBuilder.get().putExtra(BackgroundService_.CLASS_EXTRA,
+			intentBuilder.get().putExtra(BackgroundService.CLASS_EXTRA,
 					mApp.getPreferences().getMotherClass().get());
 			intentBuilder.get().putExtra(BackgroundService.DOWNLOAD_EXTRA,
 					false);
@@ -53,5 +54,9 @@ public class AlarmReceiver extends BroadcastReceiver {
 					.put(cal.getTimeInMillis());
 		}
 
+	}
+
+	public static void doOnReceive(Context context, Intent intent) {
+		new AlarmReceiver().onReceive(context, intent);
 	}
 }

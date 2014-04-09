@@ -24,14 +24,14 @@ import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.res.StringArrayRes;
 import org.androidannotations.annotations.sharedpreferences.Pref;
 
+import android.app.Application;
+import android.content.Context;
+import android.net.ConnectivityManager;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.yoavst.changesystemohelshem.views.CardExpandInside;
 import com.yoavst.changesystemohelshem.views.CardHeaderRtl;
-
-import android.app.Application;
-import android.content.Context;
-import android.net.ConnectivityManager;
 
 /**
  * The general application class that store all the data, and include some
@@ -44,6 +44,17 @@ import android.net.ConnectivityManager;
 public class MyApp extends Application {
 	@Pref
 	protected Prefs_ mPrefs;
+	/**
+	 * The hours of the start and the end of the lessons. * To get the Start
+	 * time of lesson X: [X*2-2] * To get the End time of lesson X: [X*2-1]
+	 */
+	@StringArrayRes(R.array.lessons)
+	protected static String[] mLessonsHours;
+
+	public enum LessonTime {
+		Start, End
+	}
+
 	/**
 	 * The changes of the whole school. <br>
 	 * Level 1: Layer -> 0-3 <br>
@@ -111,6 +122,7 @@ public class MyApp extends Application {
 
 	// Android methods:
 
+	@Override
 	public void onCreate() {
 		super.onCreate();
 		// Put 4 items so it will not throw ArrayIndexOutOfBoundsException
@@ -338,6 +350,13 @@ public class MyApp extends Application {
 	}
 
 	// Public methods:
+	/**
+	 * @return the start or end time of the lesson
+	 */
+	public String getLessonTime(int lessonNum, LessonTime time) {
+		return mLessonsHours[(time == LessonTime.Start ? lessonNum * 2 - 2
+				: lessonNum * 2 - 1)];
+	}
 
 	/**
 	 * @return the ArrayList of changes for the given layer
@@ -591,7 +610,7 @@ public class MyApp extends Application {
 		BackgroundService_.IntentBuilder_ intentBuilder = BackgroundService_
 				.intent(this);
 		// Put the layer and set it to download mode
-		intentBuilder.get().putExtra(BackgroundService_.LAYER_EXTRA, layer)
+		intentBuilder.get().putExtra(BackgroundService.LAYER_EXTRA, layer)
 				.putExtra(BackgroundService.DOWNLOAD_EXTRA, true);
 		// Start service
 		intentBuilder.start();

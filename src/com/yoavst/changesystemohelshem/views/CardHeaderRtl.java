@@ -10,8 +10,8 @@ import com.yoavst.changesystemohelshem.R;
  */
 public class CardHeaderRtl extends CardHeader {
 	/**
-	 * Infalte the RTL inner header. For complete RTL header, you should
-	 * infalte the whole RTL header in the card xml.
+	 * Infalte the RTL inner header. For complete RTL header, you should infalte
+	 * the whole RTL header in the card xml.
 	 */
 	public CardHeaderRtl(Context context) {
 		super(context, R.layout.card_inner_header);

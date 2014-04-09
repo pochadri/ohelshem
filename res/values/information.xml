@@ -2,21 +2,53 @@
 <resources>
 
     <string-array name="layers">
-        <item>ט</item>
-        <item>י</item>
-        <item>יא</item>
-        <item>יב</item>
+        <item>@string/layer_nine</item>
+        <item>@string/layer_ten</item>
+        <item>@string/layer_eleven</item>
+        <item>@string/layer_twelve</item>
     </string-array>
-	<integer-array name="layers_classes">
-	    <item>@integer/layer_nine_number_of_classes</item>
-	    <item>@integer/layer_ten_number_of_classes</item>
-	    <item>@integer/layer_eleven_number_of_classes</item>
-	    <item>@integer/layer_tweleve_number_of_classes</item>
-	</integer-array>
+
+    <string name="layer_nine">ט</string>
+    <string name="layer_ten">י</string>
+    <string name="layer_eleven">יא</string>
+    <string name="layer_twelve">יב</string>
+
+    <integer-array name="layers_classes">
+        <item>@integer/layer_nine_number_of_classes</item>
+        <item>@integer/layer_ten_number_of_classes</item>
+        <item>@integer/layer_eleven_number_of_classes</item>
+        <item>@integer/layer_tweleve_number_of_classes</item>
+    </integer-array>
+
     <integer name="layer_nine_number_of_classes">12</integer>
     <integer name="layer_ten_number_of_classes">11</integer>
     <integer name="layer_eleven_number_of_classes">11</integer>
     <integer name="layer_tweleve_number_of_classes">11</integer>
     <integer name="max_lessons">10</integer>
+
+    <string-array name="lessons">
+        <item>8:00</item>
+        <item>8:45</item>
+        <item>8:50</item>
+        <item>9:35</item>
+        <item>9:50</item>
+        <item>10:35</item>
+        <item>10:40</item>
+        <item>11:25</item>
+        <item>11:45</item>
+        <item>12:30</item>
+        <item>12:35</item>
+        <item>13:20</item>
+        <item>13:30</item>
+        <item>14:15</item>
+        <item>14:20</item>
+        <item>15:05</item>
+        <item>15:10</item>
+        <item>15:55</item>
+        <item>16:00</item>
+        <item>16:45</item>
+        <item>16:50</item>
+        <item>17:35</item>
+    </string-array>
 
 </resources>

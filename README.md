@@ -17,11 +17,12 @@ Also, you can read about what every class do [here](https://github.com/yoavst/oh
 * Jonathan Hedley for [Jsoup](http://jsoup.org/).
 * Excilys team for [Android annotations](https://github.com/excilys/androidannotations/wiki) that made my life a lot easier.
 * Jake Wharton for [ActionBar Sherlock](http://actionbarsherlock.com/).
-* Roman Nurik for [WizardPager](https://code.google.com/p/romannurik-code/source/browse/misc/wizardpager).
 * Alam Kanak for [Android Empty Layout](https://github.com/alamkanak/Android-Empty-Layout).
 * Google for Android, Support V4 package and for [GSON](https://code.google.com/p/google-gson/).
 * Nick Frost for [the icons pack](https://www.iconfinder.com/search/?q=iconset:ballicons-free).
-
+* Le Van Hoang for [Segmented control](https://github.com/hoang8f/android-segmented-control).
+* Tooleap team for [Tooleap](http://www.tooleap.com/).
+* Nicolas POMEPUY for [Discreet app rate](https://github.com/PomepuyN).
 License
 -------
 

@@ -41,6 +41,8 @@ public class ChangesListViewAdapter extends ArrayAdapter<ChangeObject> {
 					.findViewById(R.id.change);
 			viewHolder.lesson = (TextView) convertView
 					.findViewById(R.id.lesson);
+			viewHolder.lessonDate = (TextView) convertView
+					.findViewById(R.id.timedate);
 			convertView.setTag(viewHolder);
 		} else {
 			viewHolder = (ViewHolder) convertView.getTag();
@@ -52,6 +54,8 @@ public class ChangesListViewAdapter extends ArrayAdapter<ChangeObject> {
 		viewHolder.colorBorder.setBackgroundColor(values[position].getColor());
 		viewHolder.lessonNumber.setText(lessonNumber + " "
 				+ values[position].getLessonNumber());
+		viewHolder.lessonDate.setText(values[position].getStartTime() + " - "
+				+ values[position].getEndTime());
 		if (values[position].getChangeText().equals("-"))
 			viewHolder.change.setText(noChanges);
 		else
@@ -67,6 +71,7 @@ public class ChangesListViewAdapter extends ArrayAdapter<ChangeObject> {
 		TextView lessonNumber;
 		TextView change;
 		TextView lesson;
+		TextView lessonDate;
 		ImageView colorBorder;
 	}
 

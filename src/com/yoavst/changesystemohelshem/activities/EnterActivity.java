@@ -4,10 +4,10 @@ import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.sharedpreferences.Pref;
 
+import android.app.Activity;
+
 import com.yoavst.changesystemohelshem.Prefs_;
 import com.yoavst.changesystemohelshem.R;
-
-import android.app.Activity;
 
 /**
  * The entering class. Navigate you to the setup Activity or to the Main
@@ -31,7 +31,7 @@ public class EnterActivity extends Activity {
 				|| mPrefs.getMotherClass().getOr(0) < 1
 				|| mPrefs.getMotherClass().getOr(0) > 13) {
 			// Open setup Activity
-			SetupActivity_.intent(this).mIsSettings(false).start();
+			WizardActivity_.intent(this).mIsSettings(false).start();
 			finish();
 		} else {
 			// Open Main Activity

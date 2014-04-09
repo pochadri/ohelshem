@@ -22,7 +22,10 @@ public class DownloadTimetable {
 	void download() {
 		try {
 			/*
-			 * Level I: Layer Level II: Class Level III: Day Level IV: Hour
+			 * Level I: Layer 
+			 * Level II: Class 
+			 * Level III: Day 
+			 * Level IV: Hour
 			 */
 			String[][][][] classTimeTable = new String[4][][][];
 			classTimeTable[0] = new String[12][6][10];

@@ -1,8 +1,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <style name="AppTheme" parent="@style/Theme.Sherlock.Light">
-           <item name="homeAsUpIndicator">@drawable/ic_drawer</item>
+        <item name="homeAsUpIndicator">@drawable/ic_drawer</item>
     </style>
+
     <style name="ButtonBar" parent="@android:style/ButtonBar">
         <item name="android:background">@android:color/transparent</item>
         <item name="android:padding">0dp</item>
@@ -11,9 +12,20 @@
     <style name="ButtonBarButton">
         <item name="android:minHeight">@dimen/list_item_height_small</item>
     </style>
-    
-     <!-- Expand inside -->
+
+    <!-- Expand inside -->
     <style name="card.main_layout_expandinside" parent="card.main_layout">
         <item name="android:background">@drawable/card_background</item>
     </style>
+
+    <style name="RadioButton">
+        <item name="android:textColor">@drawable/button_text_color</item>
+        <item name="android:minHeight">33dp</item>
+        <item name="android:minWidth">70dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:button">@null</item>
+        <item name="android:paddingLeft">5dp</item>
+        <item name="android:paddingRight">5dp</item>
+    </style>
+
 </resources>

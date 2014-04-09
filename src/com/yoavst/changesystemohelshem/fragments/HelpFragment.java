@@ -7,9 +7,9 @@ import it.gmariotti.cardslib.library.view.CardView;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EFragment;
 
+import com.actionbarsherlock.app.SherlockFragment;
 import com.yoavst.changesystemohelshem.MyApp;
 import com.yoavst.changesystemohelshem.R;
-import com.actionbarsherlock.app.SherlockFragment;
 
 /**
  * This Fragment use CardsLib by Gabriele Mariotti.

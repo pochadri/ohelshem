@@ -20,13 +20,15 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.kanak.emptylayout.EmptyLayout;
+import com.tooleap.sdk.Tooleap;
+import com.tooleap.sdk.TooleapActivities;
 import com.yoavst.changesystemohelshem.ChangeObject;
 import com.yoavst.changesystemohelshem.ChangesListViewAdapter;
 import com.yoavst.changesystemohelshem.MyApp;
+import com.yoavst.changesystemohelshem.MyApp.LessonTime;
 import com.yoavst.changesystemohelshem.R;
 import com.yoavst.changesystemohelshem.activities.MainActivity_;
 
@@ -84,7 +86,7 @@ public class ChangesFragment extends SherlockFragment implements
 	 * The date of the changes or today
 	 */
 	int day;
-	final int ANIMATION_LENGTH = 1500;
+	static final int ANIMATION_LENGTH = 1500;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -109,18 +111,22 @@ public class ChangesFragment extends SherlockFragment implements
 		mLayout.setVisibility(View.GONE);
 		setVisiblityForTryAgainOutside(View.GONE);
 		// Setup pull to refresh
-		mRefreshLayout.setEnabled(true);
-		mRefreshLayout.setColorScheme(R.color.holo_green, R.color.holo_red,
-				R.color.holo_blue, R.color.holo_yellow);
-		mRefreshLayout.setOnRefreshListener(new OnRefreshListener() {
-			@Override
-			public void onRefresh() {
-				// Save the time
-				setMiliForAnimation(System.currentTimeMillis());
-				// Refresh the changes
-				((MainActivity_) getActivity()).refreshSelected();
-			}
-		});
+		if (getActivity() instanceof TooleapActivities.Sherlock.SherlockFragmentActivity) {
+			mRefreshLayout.setEnabled(false);
+		} else {
+			mRefreshLayout.setEnabled(true);
+			mRefreshLayout.setColorScheme(R.color.holo_green, R.color.holo_red,
+					R.color.holo_blue, R.color.holo_yellow);
+			mRefreshLayout.setOnRefreshListener(new OnRefreshListener() {
+				@Override
+				public void onRefresh() {
+					// Save the time
+					setMiliForAnimation(System.currentTimeMillis());
+					// Refresh the changes
+					((MainActivity_) getActivity()).refreshSelected();
+				}
+			});
+		}
 		// Setup refresh buttons
 		mButtonRefresh.setOnClickListener(this);
 		mButtonRefreshOutside.setOnClickListener(this);
@@ -142,10 +148,18 @@ public class ChangesFragment extends SherlockFragment implements
 					for (int i = 0; i < timetable.length; i++) {
 						if (timetable[i] != null && !timetable[i].equals(" "))
 							changes[i] = new ChangeObject(i + 1, timetable[i],
-									mNoChanges, colors.getColor(i % 5, 0));
+									mNoChanges, colors.getColor(i % 5, 0), mApp
+											.getLessonTime(i + 1,
+													LessonTime.Start), mApp
+											.getLessonTime(i + 1,
+													LessonTime.End));
 						else {
 							changes[i] = new ChangeObject(i + 1, " ", " ",
-									colors.getColor(i % 5, 0));
+									colors.getColor(i % 5, 0), mApp
+											.getLessonTime(i + 1,
+													LessonTime.Start), mApp
+											.getLessonTime(i + 1,
+													LessonTime.End));
 						}
 					}
 					colors.recycle();
@@ -174,6 +188,7 @@ public class ChangesFragment extends SherlockFragment implements
 				showErrorMessage(getActivity()
 						.getString(R.string.no_connection), false, null);
 				setVisiblityForTryAgainOutside(View.VISIBLE);
+				mLayout.setVisibility(View.GONE);
 			} else if (mChanges == null
 					&& mApp.getChangesForLayer(mLayer) == null) {
 				showLoadingMessage(getActivity().getResources().getString(
@@ -264,7 +279,8 @@ public class ChangesFragment extends SherlockFragment implements
 			public void DoOnEnd() {
 				day = mApp.getDayOfWeekFromLayerLastUpdateChangeTime(mLayer);
 				if (day == 0) {
-					showErrorMessage(getActivity().getString(R.string.error),
+					showErrorMessage(
+							getActivity().getString(R.string.no_connection),
 							false, null);
 					setVisiblityForTryAgainOutside(View.VISIBLE);
 				} else if (day != 7) {
@@ -314,6 +330,7 @@ public class ChangesFragment extends SherlockFragment implements
 				// Do what need to be done 2 second after start of animation
 				final Handler handler = new Handler();
 				Runnable task = new Runnable() {
+					@Override
 					public void run() {
 						mRefreshLayout.setRefreshing(false);
 						sai.DoOnEnd();
@@ -343,16 +360,20 @@ public class ChangesFragment extends SherlockFragment implements
 	@Override
 	public void onClick(View v) {
 		if (mApp.isNetworkAvailable()) {
-			// Save the time
-			setMiliForAnimation(System.currentTimeMillis());
-			// Refresh the changes
-			((MainActivity_) getActivity()).refreshSelected();
-			// Hide the buttons
-			mLayout.setVisibility(View.GONE);
-			setVisiblityForTryAgainOutside(View.GONE);
+			if (getActivity() instanceof MainActivity_) {
+				// Save the time
+				setMiliForAnimation(System.currentTimeMillis());
+				// Refresh the changes
+				((MainActivity_) getActivity()).refreshSelected();
+				// Hide the buttons
+				mLayout.setVisibility(View.GONE);
+				setVisiblityForTryAgainOutside(View.GONE);
+			} else {
+				new MainActivity_.IntentBuilder_(getActivity()).mShouldRefresh(
+						true).start();
+				Tooleap.getInstance(getActivity()).removeAllMiniApps();
+			}
 		} else {
-			Toast.makeText(getActivity(), R.string.no_connection,
-					Toast.LENGTH_SHORT).show();
 			showEmptyMessageOrTimetable();
 		}
 	}

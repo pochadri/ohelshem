@@ -2,9 +2,6 @@ package com.yoavst.changesystemohelshem.navigation;
 
 import java.util.ArrayList;
 
-import com.yoavst.changesystemohelshem.R;
-
-import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +9,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.yoavst.changesystemohelshem.R;
 
 /**
  * The adapter for the drawer navigation ListView (was taken from my another app
@@ -69,7 +68,7 @@ public class NavDrawerListAdapter extends BaseAdapter {
 		ViewHolder viewHolder;
 		if (convertView == null) {
 			LayoutInflater mInflater = (LayoutInflater) mContext
-					.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
+					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			convertView = mInflater
 					.inflate(R.layout.drawer_line, parent, false);
 			viewHolder = new ViewHolder();

@@ -14,15 +14,21 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-import com.yoavst.changesystemohelshem.activities.MainActivity_;
-
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Handler;
 import android.support.v4.app.NotificationCompat;
+import android.widget.Toast;
+
+import com.tooleap.sdk.Tooleap;
+import com.tooleap.sdk.TooleapPopOutMiniApp;
+import com.yoavst.changesystemohelshem.MyApp.LessonTime;
+import com.yoavst.changesystemohelshem.activities.FloatingActivity_;
+import com.yoavst.changesystemohelshem.activities.MainActivity_;
 
 /**
  * <p>
@@ -171,7 +177,11 @@ public class BackgroundService extends IntentService {
 							changes.get(classNum - 1).add(
 									new ChangeObject(hour, cell.text(),
 											lessonName, Color.parseColor("#"
-													+ cell.attr("bgcolor"))));
+													+ cell.attr("bgcolor")),
+											mApp.getLessonTime(hour,
+													LessonTime.Start), mApp
+													.getLessonTime(hour,
+															LessonTime.End)));
 						}
 						classNum++;
 					}
@@ -204,30 +214,43 @@ public class BackgroundService extends IntentService {
 	private void publishResults(ArrayList<ArrayList<ChangeObject>> changes,
 			String dateToShow, long day) {
 		if (mDownloadService) {
+			// if the changes are for today and not for tomorrow
+		} else if (MyApp.getDayOfWeekByMili(day) == MyApp.getDayOfWeek()) {
+			Toast.makeText(mApp, R.string.not_updated, Toast.LENGTH_LONG)
+					.show();
+			// Run the service next minute
+			new Handler().postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					AlarmReceiver.doOnReceive(mApp,
+							new Intent("UPDATE_CHANGES"));
+				}
+			}, 60000l);
+
 			// if should show notification and changes are null
 		} else if (changes == null)
-			showNotification(mApp.getResources().getString(R.string.no_changes));
+			showTooleap(false);
 		// if should show notification and changes are empty
 		else if (changes.get(mClass) == null
 				|| mApp.isChangesEmpty(changes.get(mClass)))
-			showNotification(mApp.getResources().getString(R.string.no_changes));
+			showTooleap(false);
 		// if should show notification and there are changes
 		else {
-			showNotification(mApp.getResources().getString(
-					R.string.notification_text));
+			showTooleap(true);
 		}
 		// save the changes
 		mApp.setChangesForLayer(changes, mLayer, dateToShow, day);
 
 	}
+
 	/**
-	 * Should be called if there is error with the connection 
+	 * Should be called if there is error with the connection
 	 */
 	private void connectionError() {
 		if (mDownloadService)
 			mApp.showError();
 	}
-	
+
 	/**
 	 * Show notification
 	 * 
@@ -235,6 +258,7 @@ public class BackgroundService extends IntentService {
 	 *            The text that will be shown on the notification
 	 */
 	private void showNotification(String text) {
+
 		// Cretae intent to MainActivity to be called on notification clicked
 		Intent intent = new Intent(this, MainActivity_.class);
 		PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, 0);
@@ -248,5 +272,20 @@ public class BackgroundService extends IntentService {
 				.setContentIntent(pIntent).build();
 		// Show notification
 		mNotificationManager.notify(mNotificationId, mNotification);
+
 	}
+
+	private void showTooleap(boolean isChanges) {
+		Intent intent = new Intent(this, FloatingActivity_.class);
+		TooleapPopOutMiniApp miniApp = new TooleapPopOutMiniApp(this, intent);
+		miniApp.contentTitle = mApp.getString(R.string.notification_title);
+		if (isChanges)
+			miniApp.notificationText = getText(R.string.see_changes);
+		else
+			miniApp.notificationText = getText(R.string.no_changes);
+		Tooleap tooleap = Tooleap.getInstance(this);
+		tooleap.removeAllMiniApps();
+		tooleap.addMiniApp(miniApp);
+	}
+
 }
