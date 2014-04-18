@@ -28,4 +28,19 @@
         <item name="android:paddingRight">5dp</item>
     </style>
 
+    <style name="GoogleNavDrawer.MainSectionText" parent="android:TextAppearance.Medium">
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:textSize">21sp</item>
+        <item name="android:minHeight">@dimen/main_section_item_height</item> 
+        <item name="android:gravity">center</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">marquee</item>
+    </style>
+
+    <style name="GoogleNavDrawer.SecondarySectionText" parent="GoogleNavDrawer.MainSectionText">
+        <item name="android:textSize">13sp</item>
+         <item name="android:gravity">center</item>
+        <item name="android:minHeight">@dimen/secondary_section_item_height</item>
+    </style>
+
 </resources>

@@ -23,6 +23,8 @@ Also, you can read about what every class do [here](https://github.com/yoavst/oh
 * Le Van Hoang for [Segmented control](https://github.com/hoang8f/android-segmented-control).
 * Tooleap team for [Tooleap](http://www.tooleap.com/).
 * Nicolas POMEPUY for [Discreet app rate](https://github.com/PomepuyN).
+* Arasthel for [GoogleNavigationDrawerMenu](https://github.com/Arasthel/GoogleNavigationDrawerMenu).
+
 License
 -------
 

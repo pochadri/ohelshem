@@ -8,7 +8,6 @@ import android.app.Activity;
 
 import com.yoavst.changesystemohelshem.Prefs_;
 import com.yoavst.changesystemohelshem.R;
-
 /**
  * The entering class. Navigate you to the setup Activity or to the Main
  * Activity.

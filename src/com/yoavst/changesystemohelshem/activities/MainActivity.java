@@ -17,14 +17,13 @@ import android.content.Intent;
 import android.content.res.TypedArray;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.widget.DrawerLayout;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.graphics.BitmapFactory;
+import android.widget.AbsListView;
+import android.widget.ImageView;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.OnNavigationListener;
@@ -38,8 +37,8 @@ import com.yoavst.changesystemohelshem.R;
 import com.yoavst.changesystemohelshem.fragments.ChangesFragment;
 import com.yoavst.changesystemohelshem.fragments.ChangesFragment_;
 import com.yoavst.changesystemohelshem.fragments.HelpFragment_;
-import com.yoavst.changesystemohelshem.navigation.NavDrawerItem;
-import com.yoavst.changesystemohelshem.navigation.NavDrawerListAdapter;
+import com.yoavst.changesystemohelshem.views.BetterNavigationDrawer;
+import com.yoavst.changesystemohelshem.views.BetterNavigationDrawer.NavigationDrawerOptions;
 
 import fr.nicolaspomepuy.discreetapprate.AppRate;
 import fr.nicolaspomepuy.discreetapprate.RetryPolicy;
@@ -57,10 +56,8 @@ public class MainActivity extends SherlockFragmentActivity implements
 		MyApp.UpdateChanges {
 	@App
 	MyApp mApp;
-	@ViewById(R.id.drawer_layout)
-	DrawerLayout mDrawerLayout;
-	@ViewById(R.id.drawer_list)
-	ListView mDrawerList;
+	@ViewById(R.id.navigation_drawer_container)
+	BetterNavigationDrawer mDrawerLayout;
 	@ViewById(R.id.last_title)
 	TextView mLastTitle;
 	@ViewById(R.id.last_title_date)
@@ -73,6 +70,8 @@ public class MainActivity extends SherlockFragmentActivity implements
 	LinearLayout mPane;
 	@StringArrayRes(R.array.navigation_titles)
 	String[] mNavigationTitles;
+	@StringArrayRes(R.array.secondery_navigation_titles)
+	String[] mSeconderyNavigationTitles;
 	@InstanceState
 	ActivityModes mActivityInfo = ActivityModes.NotSetYet;
 	@InstanceState
@@ -83,6 +82,8 @@ public class MainActivity extends SherlockFragmentActivity implements
 	boolean mShouldRefresh = false;
 	ActionBar mActionBar;
 	FragmentManager mFragmentManager;
+	NavigationDrawerOptions mNavDrawerOptions;
+	static boolean sShouldOpenDrawer = false;
 
 	enum ActivityModes {
 		NotSetYet, User, Layer, Help
@@ -123,32 +124,48 @@ public class MainActivity extends SherlockFragmentActivity implements
 			public void onDrawerOpened(View drawerView) {
 			}
 		};
-		mDrawerLayout.setDrawerListener(mDrawerToggle);
-		// Setup the Navigation Drawer's ListView
-		TypedArray navMenuIcons = getResources().obtainTypedArray(
+		ImageView imageHeaderView = new ImageView(this);
+		imageHeaderView.setImageBitmap(BitmapFactory.decodeResource(
+				getResources(), R.drawable.logo));
+		imageHeaderView.setScaleType(ImageView.ScaleType.FIT_XY);
+		imageHeaderView.setLayoutParams(new AbsListView.LayoutParams(
+				AbsListView.LayoutParams.MATCH_PARENT,
+				AbsListView.LayoutParams.WRAP_CONTENT));
+		TypedArray ids = getResources().obtainTypedArray(
 				R.array.navigation_icons);
-		ArrayList<NavDrawerItem> navDrawerItems = new ArrayList<NavDrawerItem>();
-		for (int i = 0; mNavigationTitles.length > i; i++) {
-			navDrawerItems.add(new NavDrawerItem(mNavigationTitles[i],
-					navMenuIcons.getResourceId(i, -1)));
+		int[] drawables = new int[ids.length()];
+		for (int i = 0; i < ids.length(); i++) {
+			drawables[i] = ids.getResourceId(i, -1);
 		}
-		navMenuIcons.recycle();
-		NavDrawerListAdapter adapter = new NavDrawerListAdapter(
-				getApplicationContext(), navDrawerItems);
-		mDrawerList.setAdapter(adapter);
-		mDrawerList.setOnItemClickListener(new OnItemClickListener() {
+		ids.recycle();
+		TypedArray secondaryIds = getResources().obtainTypedArray(
+				R.array.secondery_navigation_icons);
+		int[] secondaryDrawables = new int[secondaryIds.length()];
+		for (int i = 0; i < secondaryIds.length(); i++) {
+			secondaryDrawables[i] = secondaryIds.getResourceId(i, -1);
+		}
+		secondaryIds.recycle();
+		mNavDrawerOptions = new NavigationDrawerOptions().canItemFocus(false)
+				.setHeaderView(imageHeaderView, false)
+				.setMainSectionsEntries(mNavigationTitles)
+				.setMainSectionsDrawables(drawables)
+				.setSecondaryEntries(mSeconderyNavigationTitles)
+				.setSecondarySectionsDrawables(secondaryDrawables);
+		mDrawerLayout.setOptions(mNavDrawerOptions);
+		mDrawerLayout.setListViewSections();
+		mDrawerLayout.setDrawerListener(mDrawerToggle);
+		mDrawerLayout
+				.setOnNavigationSectionSelected(new BetterNavigationDrawer.OnNavigationSectionSelected() {
 
-			@Override
-			public void onItemClick(AdapterView<?> adapterView, View view,
-					int position, long id) {
-				showItem(position);
-			}
-		});
+					@Override
+					public void onSectionSelected(View v, int position, long id) {
+						showItem(position);
+					}
+				});
 		// If first time running the activity
 		if (mActivityInfo == ActivityModes.NotSetYet) {
 			// Show user Changes
-			showItem(0);
-			mDrawerList.setItemChecked(0, true);
+			showItem(1);
 			// If Activity recreated and user was on its changes
 		} else if (mActivityInfo == ActivityModes.User) {
 
@@ -195,7 +212,7 @@ public class MainActivity extends SherlockFragmentActivity implements
 		// The Fragment to show
 		switch (position) {
 		// User class
-		case 0:
+		case 1:
 			// The fragment's builder
 			ChangesFragment_.FragmentBuilder_ fragmentBuilder = ChangesFragment_
 					.builder();
@@ -229,12 +246,12 @@ public class MainActivity extends SherlockFragmentActivity implements
 					.getLayer().getOr(0)), mApp.getsLastTime(mApp
 					.getPreferences().getLayer().getOr(0)));
 			break;
-		case 1:
 		case 2:
 		case 3:
 		case 4:
+		case 5:
 			// Set global variable to the current layer
-			mCurrentLayer = position + 8;
+			mCurrentLayer = position + 7;
 			// Update global state
 			mActivityInfo = ActivityModes.Layer;
 			// Show the spinner
@@ -243,10 +260,10 @@ public class MainActivity extends SherlockFragmentActivity implements
 			showItemFromSpinner(1);
 			// Show the panel of last update
 			mPane.setVisibility(View.VISIBLE);
-			setLastUpdated(mApp.getLastUpdateDay(position + 8),
-					mApp.getsLastTime(position + 8));
+			setLastUpdated(mApp.getLastUpdateDay(position + 7),
+					mApp.getsLastTime(position + 7));
 			break;
-		case 5:
+		case 6:
 			// Hide the panel of last update
 			mPane.setVisibility(View.GONE);
 			// Update global state
@@ -256,10 +273,19 @@ public class MainActivity extends SherlockFragmentActivity implements
 			mFragmentManager.beginTransaction()
 					.replace(R.id.content_frame, fragment).commit();
 			break;
+		case 7:
+			settingsSelected();
+			break;
 		}
+		mDrawerLayout.check(position);
 		// Close the drawer
-
-		mDrawerLayout.closeDrawer(mDrawerList);
+		if (sShouldOpenDrawer) {
+			if (position > 2 || position > 5)
+				sShouldOpenDrawer = true;
+			else
+				mDrawerLayout.openDrawerMenu();
+		} else
+			mDrawerLayout.closeDrawerMenu();
 
 	}
 
@@ -291,7 +317,12 @@ public class MainActivity extends SherlockFragmentActivity implements
 		mFragmentManager.beginTransaction()
 				.replace(R.id.content_frame, mFragment).commit();
 		// Close drawer if opened
-		mDrawerLayout.closeDrawer(mDrawerList);
+		if (sShouldOpenDrawer)
+			mDrawerLayout.openDrawerMenu();
+		else
+			mDrawerLayout.closeDrawerMenu();
+		sShouldOpenDrawer = false;
+
 	}
 
 	/**
@@ -337,19 +368,18 @@ public class MainActivity extends SherlockFragmentActivity implements
 		// If there is Navigation Drawer
 		if (mDrawerLayout != null) {
 			// If Navigation Drawer opened
-			if (mDrawerLayout.isDrawerOpen(mDrawerList))
+			if (mDrawerLayout.isDrawerMenuOpen())
 				// Close it
-				mDrawerLayout.closeDrawer(mDrawerList);
+				mDrawerLayout.closeDrawerMenu();
 			else
 				// Open it
-				mDrawerLayout.openDrawer(mDrawerList);
+				mDrawerLayout.openDrawerMenu();
 		}
 	}
 
 	/**
-	 * On settings on menu selected
+	 * On settings selected
 	 */
-	@OptionsItem(R.id.action_settings)
 	void settingsSelected() {
 		// Start settings (setup but with back button to this) Activity.
 		WizardActivity_.intent(this).mIsSettings(true).start();
@@ -451,5 +481,12 @@ public class MainActivity extends SherlockFragmentActivity implements
 			((ChangesFragment_) fragment)
 					.setVisiblityForTryAgainOutside(View.VISIBLE);
 		}
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		// Save the drawer state
+		sShouldOpenDrawer = mDrawerLayout.isDrawerMenuOpen();
 	}
 }

@@ -13,6 +13,7 @@
     <string name="no_changes">אין שינויים</string>
     <string name="no_connection">לא קייים חיבור לאינטרנט</string>
     <string name="error_button">נסה שנית</string>
+    <string name="action_settings">הגדרות</string>
     <string name="action_refresh">עדכן שינויים</string>
     <string name="error">התרחשה שגיאה, אנא נסה שנית</string>
     <string name="loading_message">מחשב את השורש של מינוס אחד</string>
@@ -36,7 +37,10 @@
         <item>שכבת י</item>
         <item>שכבת יא</item>
         <item>שכבת יב</item>
+    </string-array>
+    <string-array name="secondery_navigation_titles">
         <item>עזרה</item>
+        <item>הגדרות</item>
     </string-array>
 
     <array name="navigation_icons">
@@ -45,7 +49,10 @@
         <item>@drawable/nav_three</item>
         <item>@drawable/nav_four</item>
         <item>@drawable/nav_five</item>
-        <item>@drawable/nav_six</item>
+    </array>
+    <array name="secondery_navigation_icons">
+        <item>@drawable/ic_action_help</item>
+        <item>@drawable/ic_action_settings</item>
     </array>
 
 </resources>

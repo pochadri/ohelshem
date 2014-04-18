@@ -45,5 +45,8 @@
     <color name="radio_button_selected_color">#ff33b5e5</color>
     <color name="radio_button_unselected_color">@android:color/transparent</color>
     <color name="title_for_wizard_color">#ff33b5e5</color>
-
+	
+    <color name="main_section_selected">@android:color/transparent</color>
+    <color name="secondary_section_selected">#ccc</color>
+    
 </resources>
