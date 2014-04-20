@@ -403,10 +403,6 @@ public class MainActivity extends SherlockFragmentActivity implements
 					((ChangesFragment) fragment)
 							.showLoadingMessage(getResources().getString(
 									R.string.loading_message));
-					// Save the time for the animation
-					((ChangesFragment) fragment).setMiliForAnimation(System
-							.currentTimeMillis());
-					((ChangesFragment) fragment).setRefreshing(true);
 					// Hide the "no changes" textview
 					((ChangesFragment) fragment)
 							.setVisibiltyForNoChanges(View.GONE);
@@ -419,8 +415,6 @@ public class MainActivity extends SherlockFragmentActivity implements
 					((ChangesFragment) fragment).showErrorMessage(
 							getResources().getString(R.string.no_connection),
 							false, null);
-					((ChangesFragment_) fragment)
-							.setVisiblityForTryAgainOutside(View.VISIBLE);
 				} else {
 					Toast.makeText(this, R.string.no_connection,
 							Toast.LENGTH_SHORT).show();
@@ -478,8 +472,6 @@ public class MainActivity extends SherlockFragmentActivity implements
 		if (fragment != null && fragment instanceof ChangesFragment_) {
 			((ChangesFragment_) fragment).showErrorMessage(
 					getString(R.string.no_connection), false, null);
-			((ChangesFragment_) fragment)
-					.setVisiblityForTryAgainOutside(View.VISIBLE);
 		}
 	}
 

@@ -22,7 +22,7 @@ public class HelpFragment extends SherlockFragment {
 			R.id.card_question3, R.id.card_question4, R.id.card_question5,
 			R.id.card_question6, R.id.card_question7, R.id.card_question8,
 			R.id.card_question9, R.id.card_question10, R.id.card_question11 };
-
+	
 	@AfterViews
 	void initCards() {
 		Card[] cards = MyApp.getHelpCards();

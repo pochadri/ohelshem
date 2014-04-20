@@ -11,26 +11,19 @@ import org.androidannotations.annotations.ViewById;
 
 import android.content.res.TypedArray;
 import android.os.Bundle;
-import android.os.Handler;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.kanak.emptylayout.EmptyLayout;
-import com.tooleap.sdk.Tooleap;
-import com.tooleap.sdk.TooleapActivities;
 import com.yoavst.changesystemohelshem.ChangeObject;
 import com.yoavst.changesystemohelshem.ChangesListViewAdapter;
 import com.yoavst.changesystemohelshem.MyApp;
 import com.yoavst.changesystemohelshem.MyApp.LessonTime;
 import com.yoavst.changesystemohelshem.R;
-import com.yoavst.changesystemohelshem.activities.MainActivity_;
 
 /**
  * The most used fragment - the fragment that showing the changes.
@@ -39,24 +32,16 @@ import com.yoavst.changesystemohelshem.activities.MainActivity_;
  * 
  */
 @EFragment(R.layout.fragment_changes)
-public class ChangesFragment extends SherlockFragment implements
-		OnClickListener {
+public class ChangesFragment extends SherlockFragment
+		 {
 	@ViewById(R.id.lessons)
 	ListView mListView;
 	@ViewById(R.id.nochanges)
 	TextView mTextViewNoChanges;
 	@ViewById(R.id.cached)
 	TextView mTextViewCached;
-	@ViewById(R.id.refresh_layout)
-	SwipeRefreshLayout mRefreshLayout;
 	@ViewById(R.id.showtimetable)
 	Button mButtonTimetable;
-	@ViewById(R.id.refreshbutton)
-	Button mButtonRefresh;
-	@ViewById(R.id.layout)
-	RelativeLayout mLayout;
-	@ViewById(R.id.refreshbuttonoutside)
-	Button mButtonRefreshOutside;
 	@FragmentArg("layer")
 	@InstanceState
 	int mLayer;
@@ -108,28 +93,6 @@ public class ChangesFragment extends SherlockFragment implements
 		setVisibiltyForNoChanges(View.GONE);
 		setVisibiltyForCached(View.GONE);
 		// Set Visibility of the "show timetable" button to not visible
-		mLayout.setVisibility(View.GONE);
-		setVisiblityForTryAgainOutside(View.GONE);
-		// Setup pull to refresh
-		if (getActivity() instanceof TooleapActivities.Sherlock.SherlockFragmentActivity) {
-			mRefreshLayout.setEnabled(false);
-		} else {
-			mRefreshLayout.setEnabled(true);
-			mRefreshLayout.setColorScheme(R.color.holo_green, R.color.holo_red,
-					R.color.holo_blue, R.color.holo_yellow);
-			mRefreshLayout.setOnRefreshListener(new OnRefreshListener() {
-				@Override
-				public void onRefresh() {
-					// Save the time
-					setMiliForAnimation(System.currentTimeMillis());
-					// Refresh the changes
-					((MainActivity_) getActivity()).refreshSelected();
-				}
-			});
-		}
-		// Setup refresh buttons
-		mButtonRefresh.setOnClickListener(this);
-		mButtonRefreshOutside.setOnClickListener(this);
 		// Setup show timetable button
 		mButtonTimetable.setOnClickListener(new OnClickListener() {
 			@Override
@@ -138,7 +101,6 @@ public class ChangesFragment extends SherlockFragment implements
 				if (day == 0) {
 					showErrorMessage(getActivity().getString(R.string.error),
 							false, null);
-					setVisiblityForTryAgainOutside(View.VISIBLE);
 				} else {
 					// Show timetable
 					String[] timetable = mTimetable[day - 1];
@@ -167,8 +129,8 @@ public class ChangesFragment extends SherlockFragment implements
 							changes);
 					mListView.setAdapter(mAdapter);
 					setVisibiltyForNoChanges(View.VISIBLE);
-					// Hide the buttons
-					mLayout.setVisibility(View.GONE);
+					// Hide the button
+					mButtonTimetable.setVisibility(View.GONE);
 				}
 			}
 		});
@@ -187,8 +149,7 @@ public class ChangesFragment extends SherlockFragment implements
 					&& mApp.getChangesForLayer(mLayer) == null) {
 				showErrorMessage(getActivity()
 						.getString(R.string.no_connection), false, null);
-				setVisiblityForTryAgainOutside(View.VISIBLE);
-				mLayout.setVisibility(View.GONE);
+				mButtonTimetable.setVisibility(View.GONE);
 			} else if (mChanges == null
 					&& mApp.getChangesForLayer(mLayer) == null) {
 				showLoadingMessage(getActivity().getResources().getString(
@@ -204,7 +165,6 @@ public class ChangesFragment extends SherlockFragment implements
 
 	public void showErrorMessage(String errorMessage, boolean showButton,
 			OnClickListener listener) {
-		mRefreshLayout.setRefreshing(false);
 		mEmptyLayout.setErrorMessage(errorMessage);
 		mEmptyLayout.setShowErrorButton(showButton);
 		mEmptyLayout.setErrorButtonClickListener(listener);
@@ -235,14 +195,9 @@ public class ChangesFragment extends SherlockFragment implements
 		if (mChanges == null || mApp.isChangesEmpty(mChanges)) {
 			showEmptyMessageOrTimetable();
 		} else {
-			stopRefreshingAnimation(new StopAnimationInterface() {
-				@Override
-				public void DoOnEnd() {
-					mAdapter = new ChangesListViewAdapter(getActivity(),
-							mChanges.toArray(new ChangeObject[mChanges.size()]));
-					mListView.setAdapter(mAdapter);
-				}
-			});
+			mAdapter = new ChangesListViewAdapter(getActivity(),
+					mChanges.toArray(new ChangeObject[mChanges.size()]));
+			mListView.setAdapter(mAdapter);
 		}
 	}
 
@@ -256,16 +211,12 @@ public class ChangesFragment extends SherlockFragment implements
 
 	public void showEmptyMessage(final String emptyMessage,
 			final boolean showEmptyButton, final OnClickListener listener) {
-		stopRefreshingAnimation(new StopAnimationInterface() {
-			@Override
-			public void DoOnEnd() {
-				mListView.setAdapter(null);
-				mEmptyLayout.setEmptyMessage(emptyMessage);
-				mEmptyLayout.setShowEmptyButton(showEmptyButton);
-				mEmptyLayout.setEmptyButtonClickListener(listener);
-				mEmptyLayout.showEmpty();
-			}
-		});
+		mListView.setAdapter(null);
+		mEmptyLayout.setEmptyMessage(emptyMessage);
+		mEmptyLayout.setShowEmptyButton(showEmptyButton);
+		mEmptyLayout.setEmptyButtonClickListener(listener);
+		mEmptyLayout.showEmpty();
+
 	}
 
 	public void showEmptyMessage(String emptyMessage) {
@@ -273,38 +224,24 @@ public class ChangesFragment extends SherlockFragment implements
 	}
 
 	public void showEmptyMessageOrTimetable() {
-		stopRefreshingAnimation(new StopAnimationInterface() {
-
-			@Override
-			public void DoOnEnd() {
 				day = mApp.getDayOfWeekFromLayerLastUpdateChangeTime(mLayer);
 				if (day == 0) {
 					showErrorMessage(
 							getActivity().getString(R.string.no_connection),
 							false, null);
-					setVisiblityForTryAgainOutside(View.VISIBLE);
 				} else if (day != 7) {
 					String[] timetable = mTimetable[day - 1];
 					if (MyApp.isTimetableEmpty(timetable)) {
 						showEmptyMessage(getResources().getString(
 								R.string.no_changes));
-						setVisiblityForTryAgainOutside(View.VISIBLE);
 					} else {
 						showEmptyMessage(getActivity().getString(
 								R.string.no_changes));
-						mLayout.setVisibility(View.VISIBLE);
+						mButtonTimetable.setVisibility(View.VISIBLE);
 					}
 				} else {
 					showEmptyMessage(mNoChanges);
-					setVisiblityForTryAgainOutside(View.VISIBLE);
 				}
-
-			}
-		});
-	}
-
-	public void setVisiblityForTryAgainOutside(int status) {
-		mButtonRefreshOutside.setVisibility(status);
 	}
 
 	public void setVisibiltyForNoChanges(int status) {
@@ -313,68 +250,5 @@ public class ChangesFragment extends SherlockFragment implements
 
 	public void setVisibiltyForCached(int status) {
 		mTextViewCached.setVisibility(status);
-	}
-
-	public void setRefreshing(boolean refreshing) {
-		mRefreshLayout.setRefreshing(refreshing);
-	}
-
-	private void stopRefreshingAnimation(final StopAnimationInterface sai) {
-		if (mRefreshLayout.isRefreshing()) {
-			// Check the current time
-			long cTime = System.currentTimeMillis();
-			// Check how many milisecond check the refreshing
-			int subtract = (int) (cTime - mMilisForAnimation);
-			// If it took less then 2 seconds
-			if (subtract <= ANIMATION_LENGTH) {
-				// Do what need to be done 2 second after start of animation
-				final Handler handler = new Handler();
-				Runnable task = new Runnable() {
-					@Override
-					public void run() {
-						mRefreshLayout.setRefreshing(false);
-						sai.DoOnEnd();
-					}
-				};
-				handler.postDelayed(task, ANIMATION_LENGTH - subtract);
-			} else {
-				// Do what need to be done
-				mRefreshLayout.setRefreshing(false);
-				sai.DoOnEnd();
-			}
-		} else
-			sai.DoOnEnd();
-	}
-
-	public void setMiliForAnimation(long milis) {
-		mMilisForAnimation = milis;
-	}
-
-	private interface StopAnimationInterface {
-		void DoOnEnd();
-	}
-
-	/**
-	 * On click listener for refresh buttons
-	 */
-	@Override
-	public void onClick(View v) {
-		if (mApp.isNetworkAvailable()) {
-			if (getActivity() instanceof MainActivity_) {
-				// Save the time
-				setMiliForAnimation(System.currentTimeMillis());
-				// Refresh the changes
-				((MainActivity_) getActivity()).refreshSelected();
-				// Hide the buttons
-				mLayout.setVisibility(View.GONE);
-				setVisiblityForTryAgainOutside(View.GONE);
-			} else {
-				new MainActivity_.IntentBuilder_(getActivity()).mShouldRefresh(
-						true).start();
-				Tooleap.getInstance(getActivity()).removeAllMiniApps();
-			}
-		} else {
-			showEmptyMessageOrTimetable();
-		}
 	}
 }

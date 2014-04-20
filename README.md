@@ -7,7 +7,7 @@ It based on the [official changes system](http://ohel-shem.com/php/changes/chang
 [![Get it on Google Play](http://www.android.com/images/brand/get_it_on_play_logo_small.png)](https://play.google.com/store/apps/details?id=com.yoavst.changesystemohelshem)
 
 ## How it works?
-You can read the explaintion of how application get the changes from the school site from [here](ttps://github.com/yoavst/ohelshem/wiki/Get-the-changes-from-the-school-site), or directly at the source code [here](https://github.com/yoavst/ohelshem/blob/master/src/com/yoavst/changesystemohelshem/BackgroundService.java).  
+You can read the explaintion of how application get the changes from the school site from [here](https://github.com/yoavst/ohelshem/wiki/Get-the-changes-from-the-school-site), or directly at the source code [here](https://github.com/yoavst/ohelshem/blob/master/src/com/yoavst/changesystemohelshem/BackgroundService.java).  
 Also, you can read about what every class do [here](https://github.com/yoavst/ohelshem/wiki/Source-map).  
 *Note: The code heavily use AndroidAnnotations, so the code may look diffrent then another Android apps.* 
 
